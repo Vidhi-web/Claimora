@@ -1,0 +1,28 @@
+<div class="app-layout">
+  <nav class="top-navbar">
+    <div class="nav-brand">
+      <span class="brand-shield">🛡️</span>
+      <span class="brand-text">Claimora</span>
+      <span class="brand-tag">Fraud Risk Platform</span>
+    </div>
+
+    <div class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+      <a routerLink="/claims" routerLinkActive="active">Claims</a>
+      <a routerLink="/products" routerLinkActive="active">Products</a>
+      <a routerLink="/evidence" routerLinkActive="active">Evidence</a>
+      <a routerLink="/findings" routerLinkActive="active">Findings</a>
+      <a routerLink="/investigations" routerLinkActive="active">Investigations</a>
+      <a routerLink="/reports" routerLinkActive="active">Reports</a>
+      <a routerLink="/users" routerLinkActive="active">Users</a>
+    </div>
+
+    <div class="nav-actions">
+      <a routerLink="/auth" class="auth-btn">Sign In</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

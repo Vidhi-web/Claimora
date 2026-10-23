@@ -1,0 +1,93 @@
+# Claimora Root .gitignore (Java + Node + IDE)
+
+# --------------------------------------------------
+# Operating System Files
+# --------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# --------------------------------------------------
+# Environment & Credentials (NEVER COMMIT)
+# --------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pkcs12
+*.pfx
+*.p12
+
+# --------------------------------------------------
+# IDEs and Editors
+# --------------------------------------------------
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+.factorypath
+*.sublime-project
+*.sublime-workspace
+.nb-gradle/
+.history/
+
+# --------------------------------------------------
+# Node & Frontend (Angular)
+# --------------------------------------------------
+frontend/node_modules/
+node_modules/
+frontend/dist/
+dist/
+.angular/
+frontend/.angular/
+package-lock.json.bak
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --------------------------------------------------
+# Java & Backend (Spring Boot / Maven)
+# --------------------------------------------------
+backend/target/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+backend/.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
+
+# Log Files
+*.log
+logs/
+backend/logs/
+
+# Test output
+frontend/coverage/
+coverage/
+backend/target/surefire-reports/
+backend/target/failsafe-reports/
+
+# Scratch & Temporary files
+scratch/
+tmp/
+temp/

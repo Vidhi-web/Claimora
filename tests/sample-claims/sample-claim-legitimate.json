@@ -1,0 +1,30 @@
+{
+  "claimNumber": "CLM-SAMPLE-003",
+  "product": {
+    "serialNumber": "SN-SMS-S24U-10294",
+    "model": "Samsung Galaxy S24 Ultra",
+    "purchaseDate": "2025-03-01",
+    "warrantyStart": "2025-03-01",
+    "warrantyEnd": "2026-03-01"
+  },
+  "claimant": {
+    "name": "David Miller",
+    "email": "david.miller@example.net"
+  },
+  "claimDate": "2025-11-20",
+  "issueDescription": "Telephoto camera optical image stabilization actuator malfunction. Verified at authorized service center.",
+  "status": "APPROVED",
+  "evidenceDocuments": [
+    {
+      "documentType": "SERVICE_ESTIMATE",
+      "fileName": "samsung_care_estimate.pdf",
+      "fileHash": "9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba",
+      "extractedData": {
+        "serviceCenter": "Samsung Care Authorized Partner #18",
+        "estimatedCost": 210.00,
+        "authenticDiagnostic": true
+      }
+    }
+  ],
+  "expectedFindings": []
+}

@@ -1,0 +1,47 @@
+{
+  "claimNumber": "CLM-SAMPLE-001",
+  "product": {
+    "serialNumber": "SN-XPS15-9520-4821",
+    "model": "Dell XPS 15 9520",
+    "purchaseDate": "2025-01-15",
+    "warrantyStart": "2025-01-15",
+    "warrantyEnd": "2027-01-15"
+  },
+  "claimant": {
+    "name": "John Doe",
+    "email": "john.doe@example.com"
+  },
+  "claimDate": "2026-02-10",
+  "issueDescription": "Display flickering intermittently under graphical load. Screen shows purple artifacts and shuts off.",
+  "status": "FLAGGED",
+  "evidenceDocuments": [
+    {
+      "documentType": "INVOICE",
+      "fileName": "invoice_besttech_2025.pdf",
+      "fileHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "extractedData": {
+        "store": "BestTech Electronics #412",
+        "totalAmount": 1899.99,
+        "date": "2025-01-15",
+        "ocrConfidence": 0.98
+      }
+    },
+    {
+      "documentType": "PHOTO_DAMAGE",
+      "fileName": "screen_cracked_evidence.jpg",
+      "fileHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "extractedData": {
+        "tamperDetected": true,
+        "tamperMethod": "Photoshop Clone Stamp on Serial Label",
+        "confidence": 0.91
+      }
+    }
+  ],
+  "expectedFindings": [
+    {
+      "ruleCode": "RULE_IMAGE_TAMPER_DETECTED",
+      "severity": "CRITICAL",
+      "description": "Evidence image indicates cloning artifacts over serial number badge."
+    }
+  ]
+}
