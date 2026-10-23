@@ -62,8 +62,8 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Public authentication and system health endpoints
-                        .requestMatchers("/api/auth/**", "/api/health", "/error").permitAll()
+                        // Public authentication, dev console, and system health endpoints
+                        .requestMatchers("/api/auth/**", "/api/health", "/error", "/h2-console/**").permitAll()
                         // Password change accessible to any logged-in user
                         .requestMatchers("/api/users/me/password").authenticated()
                         // User management restricted to ADMIN role
@@ -71,6 +71,7 @@ public class SecurityConfig {
                         // Default fallback requires authentication
                         .anyRequest().authenticated()
                 )
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

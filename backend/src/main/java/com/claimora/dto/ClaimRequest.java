@@ -13,8 +13,7 @@ public class ClaimRequest {
     @NotNull(message = "Product ID is required")
     private Long productId;
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
+    private Long userId; // Optional: defaults to authenticated user
 
     @NotBlank(message = "Claim number is required")
     private String claimNumber;

@@ -5,11 +5,17 @@ import java.time.LocalDate;
 import java.time.Instant;
 
 /**
- * Warranty claim entity.
+ * Warranty claim entity connecting a product and claimant user with a unique claim number.
  * Owner: Tanishka (Claim)
  */
 @Entity
-@Table(name = "claim")
+@Table(name = "claim", indexes = {
+        @Index(name = "idx_claim_number", columnList = "claim_number"),
+        @Index(name = "idx_claim_product_id", columnList = "product_id"),
+        @Index(name = "idx_claim_user_id", columnList = "user_id"),
+        @Index(name = "idx_claim_status", columnList = "status"),
+        @Index(name = "idx_claim_date", columnList = "claim_date")
+})
 public class Claim {
 
     @Id
@@ -31,8 +37,9 @@ public class Claim {
     @Column(name = "claim_date", nullable = false)
     private LocalDate claimDate = LocalDate.now();
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
-    private String status = "SUBMITTED"; // SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, FLAGGED
+    private ClaimStatus status = ClaimStatus.SUBMITTED;
 
     @Column(name = "issue_description", nullable = false, columnDefinition = "TEXT")
     private String issueDescription;
@@ -46,14 +53,19 @@ public class Claim {
     public Claim() {
     }
 
-    public Claim(Product product, User user, String claimNumber, LocalDate claimDate, String status, String issueDescription) {
+    public Claim(Product product, User user, String claimNumber, LocalDate claimDate, ClaimStatus status, String issueDescription) {
         this.product = product;
         this.user = user;
         this.claimNumber = claimNumber;
         this.claimDate = claimDate != null ? claimDate : LocalDate.now();
-        this.status = status != null ? status : "SUBMITTED";
+        this.status = status != null ? status : ClaimStatus.SUBMITTED;
         this.issueDescription = issueDescription;
         this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
         this.updatedAt = Instant.now();
     }
 
@@ -97,11 +109,11 @@ public class Claim {
         this.claimDate = claimDate;
     }
 
-    public String getStatus() {
+    public ClaimStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ClaimStatus status) {
         this.status = status;
     }
 

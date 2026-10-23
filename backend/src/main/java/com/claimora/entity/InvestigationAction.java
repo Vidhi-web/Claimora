@@ -8,7 +8,11 @@ import java.time.Instant;
  * Owner: Anuj (InvestigationAction)
  */
 @Entity
-@Table(name = "investigation_action")
+@Table(name = "investigation_action", indexes = {
+        @Index(name = "idx_action_finding_id", columnList = "finding_id"),
+        @Index(name = "idx_action_user_id", columnList = "user_id"),
+        @Index(name = "idx_action_time", columnList = "action_time")
+})
 public class InvestigationAction {
 
     @Id
@@ -24,17 +28,20 @@ public class InvestigationAction {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "action_type", nullable = false, length = 100)
-    private String actionType;
+    private ActionType actionType;
 
     @Column(name = "explanation", nullable = false, columnDefinition = "TEXT")
     private String explanation;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "previous_status", length = 50)
-    private String previousStatus;
+    private FindingStatus previousStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "new_status", nullable = false, length = 50)
-    private String newStatus;
+    private FindingStatus newStatus;
 
     @Column(name = "action_time", nullable = false, updatable = false)
     private Instant actionTime = Instant.now();
@@ -42,7 +49,8 @@ public class InvestigationAction {
     public InvestigationAction() {
     }
 
-    public InvestigationAction(Finding finding, User user, String actionType, String explanation, String previousStatus, String newStatus) {
+    public InvestigationAction(Finding finding, User user, ActionType actionType, String explanation,
+                               FindingStatus previousStatus, FindingStatus newStatus) {
         this.finding = finding;
         this.user = user;
         this.actionType = actionType;
@@ -76,11 +84,11 @@ public class InvestigationAction {
         this.user = user;
     }
 
-    public String getActionType() {
+    public ActionType getActionType() {
         return actionType;
     }
 
-    public void setActionType(String actionType) {
+    public void setActionType(ActionType actionType) {
         this.actionType = actionType;
     }
 
@@ -92,19 +100,19 @@ public class InvestigationAction {
         this.explanation = explanation;
     }
 
-    public String getPreviousStatus() {
+    public FindingStatus getPreviousStatus() {
         return previousStatus;
     }
 
-    public void setPreviousStatus(String previousStatus) {
+    public void setPreviousStatus(FindingStatus previousStatus) {
         this.previousStatus = previousStatus;
     }
 
-    public String getNewStatus() {
+    public FindingStatus getNewStatus() {
         return newStatus;
     }
 
-    public void setNewStatus(String newStatus) {
+    public void setNewStatus(FindingStatus newStatus) {
         this.newStatus = newStatus;
     }
 

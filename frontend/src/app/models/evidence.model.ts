@@ -1,18 +1,22 @@
-export type DocumentType = 'INVOICE' | 'PHOTO_DAMAGE' | 'RECEIPT' | 'SERVICE_ESTIMATE';
+export type DocumentType = 'INVOICE' | 'REPAIR_REPORT' | 'PARTS_INVOICE' | 'PHOTO';
+export type OcrStatus = 'PENDING' | 'PROCESSED' | 'FAILED' | 'MANUAL';
 
 export interface EvidenceDocument {
   documentId: number;
   claimId: number;
+  claimNumber?: string;
   documentType: DocumentType;
   filePath: string;
   fileHash: string;
-  extractedData?: Record<string, unknown>;
+  originalFilename?: string;
+  mimeType?: string;
+  fileSize?: number;
+  ocrStatus: OcrStatus;
+  extractedData?: string;
   uploadDate?: string;
 }
 
-export interface EvidenceLink {
-  findingId: number;
-  documentId: number;
-  evidenceRole: string;
-  createdAt?: string;
+export interface UpdateExtractedDataRequest {
+  extractedData: string;
+  reason?: string;
 }

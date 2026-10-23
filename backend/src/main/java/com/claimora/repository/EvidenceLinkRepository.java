@@ -8,13 +8,15 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Data repository for EvidenceLink join entity.
- * Shared Integration.
+ * Spring Data repository for EvidenceLink join entity.
+ * Shared / Integration.
  */
 @Repository
 public interface EvidenceLinkRepository extends JpaRepository<EvidenceLink, EvidenceLinkId> {
 
-    List<EvidenceLink> findByIdFindingId(Long findingId);
+    List<EvidenceLink> findById_FindingId(Long findingId);
 
-    List<EvidenceLink> findByIdDocumentId(Long documentId);
+    List<EvidenceLink> findById_DocumentId(Long documentId);
+
+    List<EvidenceLink> findByFinding_Claim_ClaimId(Long claimId);
 }

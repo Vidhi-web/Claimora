@@ -1,14 +1,19 @@
 package com.claimora.repository;
 
 import com.claimora.entity.Claim;
+import com.claimora.entity.ClaimStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Data repository for Claim entity.
+ * Spring Data repository for Claim entity.
  * Owner: Tanishka (Claim)
  */
 @Repository
@@ -18,9 +23,29 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
 
     boolean existsByClaimNumber(String claimNumber);
 
-    List<Claim> findByStatus(String status);
+    List<Claim> findByProduct_ProductId(Long productId);
 
-    List<Claim> findByProductProductId(Long productId);
+    List<Claim> findByProduct_SerialNumber(String serialNumber);
 
-    List<Claim> findByUserUserId(Long userId);
+    long countByStatus(ClaimStatus status);
+
+    long countByUser_UserId(Long userId);
+
+    long countByUser_UserIdAndStatus(Long userId, ClaimStatus status);
+
+    List<Claim> findTop5ByStatusOrderByCreatedAtDesc(ClaimStatus status);
+
+    @Query("SELECT c FROM Claim c WHERE " +
+           "(:userId IS NULL OR c.user.userId = :userId) AND " +
+           "(:status IS NULL OR c.status = :status) AND " +
+           "(:search IS NULL OR :search = '' OR " +
+           "LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(c.product.serialNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(c.product.model) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Claim> findFilteredClaims(
+            @Param("userId") Long userId,
+            @Param("status") ClaimStatus status,
+            @Param("search") String search,
+            Pageable pageable
+    );
 }

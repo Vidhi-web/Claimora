@@ -9,7 +9,10 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "evidence_document", indexes = {
-        @Index(name = "idx_evidence_file_hash", columnList = "file_hash")
+        @Index(name = "idx_evidence_file_hash", columnList = "file_hash"),
+        @Index(name = "idx_evidence_claim_id", columnList = "claim_id"),
+        @Index(name = "idx_evidence_doc_type", columnList = "document_type"),
+        @Index(name = "idx_evidence_upload_date", columnList = "upload_date")
 })
 public class EvidenceDocument {
 
@@ -22,14 +25,27 @@ public class EvidenceDocument {
     @JoinColumn(name = "claim_id", nullable = false)
     private Claim claim;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "document_type", nullable = false, length = 50)
-    private String documentType; // INVOICE, PHOTO_DAMAGE, RECEIPT, SERVICE_ESTIMATE
+    private DocumentType documentType;
 
     @Column(name = "file_path", nullable = false, length = 500)
     private String filePath;
 
     @Column(name = "file_hash", nullable = false, length = 128)
     private String fileHash;
+
+    @Column(name = "original_filename", length = 255)
+    private String originalFilename;
+
+    @Column(name = "mime_type", length = 100)
+    private String mimeType;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
+    @Column(name = "ocr_status", nullable = false, length = 50)
+    private String ocrStatus = "PENDING"; // PENDING, PROCESSED, FAILED, MANUAL
 
     @Column(name = "extracted_data", columnDefinition = "jsonb")
     private String extractedData = "{}";
@@ -40,11 +56,16 @@ public class EvidenceDocument {
     public EvidenceDocument() {
     }
 
-    public EvidenceDocument(Claim claim, String documentType, String filePath, String fileHash, String extractedData) {
+    public EvidenceDocument(Claim claim, DocumentType documentType, String filePath, String fileHash,
+                            String originalFilename, String mimeType, Long fileSize, String ocrStatus, String extractedData) {
         this.claim = claim;
         this.documentType = documentType;
         this.filePath = filePath;
         this.fileHash = fileHash;
+        this.originalFilename = originalFilename;
+        this.mimeType = mimeType;
+        this.fileSize = fileSize;
+        this.ocrStatus = ocrStatus != null ? ocrStatus : "PENDING";
         this.extractedData = extractedData != null ? extractedData : "{}";
         this.uploadDate = Instant.now();
     }
@@ -65,11 +86,11 @@ public class EvidenceDocument {
         this.claim = claim;
     }
 
-    public String getDocumentType() {
+    public DocumentType getDocumentType() {
         return documentType;
     }
 
-    public void setDocumentType(String documentType) {
+    public void setDocumentType(DocumentType documentType) {
         this.documentType = documentType;
     }
 
@@ -87,6 +108,38 @@ public class EvidenceDocument {
 
     public void setFileHash(String fileHash) {
         this.fileHash = fileHash;
+    }
+
+    public String getOriginalFilename() {
+        return originalFilename;
+    }
+
+    public void setOriginalFilename(String originalFilename) {
+        this.originalFilename = originalFilename;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public String getOcrStatus() {
+        return ocrStatus;
+    }
+
+    public void setOcrStatus(String ocrStatus) {
+        this.ocrStatus = ocrStatus;
     }
 
     public String getExtractedData() {

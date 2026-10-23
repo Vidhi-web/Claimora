@@ -30,6 +30,18 @@ public class UserResponse {
         this.createdAt = createdAt;
     }
 
+    public static UserResponse fromEntity(com.claimora.entity.User user) {
+        if (user == null) return null;
+        return new UserResponse(
+                user.getUserId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getStatus(),
+                user.getCreatedAt()
+        );
+    }
+
     public Long getUserId() {
         return userId;
     }
