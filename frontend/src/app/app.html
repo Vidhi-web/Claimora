@@ -6,19 +6,39 @@
       <span class="brand-tag">Fraud Risk Platform</span>
     </div>
 
-    <div class="nav-links">
+    <!-- Navigation links for authenticated sessions -->
+    <div class="nav-links" *ngIf="authService.isAuthenticated()">
       <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
-      <a routerLink="/claims" routerLinkActive="active">Claims</a>
       <a routerLink="/products" routerLinkActive="active">Products</a>
-      <a routerLink="/evidence" routerLinkActive="active">Evidence</a>
+      <a routerLink="/claims" routerLinkActive="active">All Claims</a>
+      <a routerLink="/evidence" routerLinkActive="active">Evidence Explorer</a>
       <a routerLink="/findings" routerLinkActive="active">Findings</a>
-      <a routerLink="/investigations" routerLinkActive="active">Investigations</a>
+      <a routerLink="/investigations" routerLinkActive="active">Investigation History</a>
       <a routerLink="/reports" routerLinkActive="active">Reports</a>
-      <a routerLink="/users" routerLinkActive="active">Users</a>
+      
+      <!-- Admin Only Nav Item -->
+      <a *ngIf="authService.isAdmin()" routerLink="/users" routerLinkActive="active" class="nav-admin">
+        User Management
+      </a>
+
+      <a routerLink="/profile" routerLinkActive="active">Profile & Settings</a>
     </div>
 
+    <!-- User actions & session status -->
     <div class="nav-actions">
-      <a routerLink="/auth" class="auth-btn">Sign In</a>
+      <ng-container *ngIf="authService.isAuthenticated(); else guestActions">
+        <div class="user-pill" routerLink="/profile">
+          <span class="user-name">{{ authService.currentUser()?.name }}</span>
+          <span class="user-role-badge" [ngClass]="authService.currentUser()?.role?.toLowerCase() || ''">
+            {{ authService.currentUser()?.role }}
+          </span>
+        </div>
+        <button type="button" class="btn-logout" (click)="onLogout()">Sign Out</button>
+      </ng-container>
+
+      <ng-template #guestActions>
+        <a routerLink="/auth/login" class="btn-login">Sign In</a>
+      </ng-template>
     </div>
   </nav>
 

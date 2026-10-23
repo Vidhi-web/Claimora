@@ -28,8 +28,61 @@ All backend services follow standardized RESTful guidelines:
 ## 2. Authentication & Users (`/api/auth`, `/api/users`)
 *Owner: Vidhi*
 
-### `POST /api/auth/login`
-Authenticates a user and returns a session/bearer token with role permissions.
+### 2.1 Role-Based Access Control (RBAC) Architecture
+Claimora enforces method-level security via Spring Security `@EnableMethodSecurity`.
+All incoming requests bearing a `Bearer <token>` header are intercepted by `JwtAuthenticationFilter`, which parses claims and populates the `SecurityContextHolder` with `ROLE_<ROLE>` authorities (`ROLE_ADMIN`, `ROLE_INVESTIGATOR`, `ROLE_STAFF`).
+
+#### Guidelines for Team Members Protecting Their Endpoints:
+To secure your controllers/endpoints, annotate the class or method with Spring Security's `@PreAuthorize`:
+- **Restricted to Administrators only**:
+  ```java
+  @PreAuthorize("hasRole('ADMIN')")
+  ```
+- **Accessible to Investigators and Administrators**:
+  ```java
+  @PreAuthorize("hasAnyRole('ADMIN', 'INVESTIGATOR')")
+  ```
+- **Accessible to any authenticated user**:
+  ```java
+  @PreAuthorize("isAuthenticated()")
+  ```
+- **Accessing the authenticated user's details**:
+  ```java
+  @GetMapping("/my-claims")
+  public ResponseEntity<List<ClaimResponse>> getMyClaims(@AuthenticationPrincipal CustomUserDetails userDetails) {
+      Long currentUserId = userDetails.getUserId();
+      // ...
+  }
+  ```
+- **Unauthorized / Forbidden Error Responses**:
+  - Unauthenticated requests (missing/expired/invalid token) receive `401 Unauthorized`:
+    ```json
+    {
+      "timestamp": "2026-10-23T15:30:00.000Z",
+      "status": 401,
+      "error": "Unauthorized",
+      "message": "Full authentication is required to access this resource",
+      "path": "/api/claims"
+    }
+    ```
+  - Authenticated users lacking required role receive `403 Forbidden`:
+    ```json
+    {
+      "timestamp": "2026-10-23T15:30:00.000Z",
+      "status": 403,
+      "error": "Forbidden",
+      "message": "You do not have permission to access this resource",
+      "path": "/api/users"
+    }
+    ```
+
+---
+
+### 2.2 Endpoints Specification
+
+#### `POST /api/auth/login`
+Authenticates a user and returns a signed JWT token with user summary details.
+- **Access**: Public
 - **Request Body**:
   ```json
   {
@@ -43,21 +96,182 @@ Authenticates a user and returns a session/bearer token with role permissions.
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "user": {
       "userId": 1,
-      "name": "Vidhi Lead",
+      "name": "System Administrator",
       "email": "vidhi.admin@claimora.internal",
       "role": "ADMIN",
       "status": "ACTIVE"
     }
   }
   ```
+- **Error Responses**:
+  - `401 Unauthorized`: Invalid credentials (`{"status": 401, "message": "Invalid email or password"}`).
+  - `403 Forbidden`: Inactive account (`{"status": 403, "message": "Account is inactive. Please contact your system administrator."}`).
 
-### `GET /api/users`
-Lists system users with pagination and role filtering.
-- **Query Params**: `page` (int), `size` (int), `role` (ADMIN|INVESTIGATOR|STAFF), `status` (ACTIVE|INACTIVE)
-- **Response 200 OK**: Array of `UserResponseDto`.
+---
 
-### `POST /api/users`
-Creates a new system user (Admin only).
+#### `POST /api/auth/register`
+Self-service user registration. Automatically assigns role `STAFF` and status `ACTIVE`.
+- **Access**: Public
+- **Request Body**:
+  ```json
+  {
+    "name": "Jane Investigator",
+    "email": "jane.investigator@claimora.internal",
+    "password": "SecurePassword123!"
+  }
+  ```
+- **Validation**:
+  - `name`: Not blank.
+  - `email`: Valid format.
+  - `password`: Minimum 8 characters, containing at least one letter and one number.
+- **Response 201 Created**:
+  ```json
+  {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "userId": 2,
+      "name": "Jane Investigator",
+      "email": "jane.investigator@claimora.internal",
+      "role": "STAFF",
+      "status": "ACTIVE"
+    }
+  }
+  ```
+- **Error Responses**:
+  - `400 Bad Request`: Validation failure or duplicate email (`Email already in use`).
+
+---
+
+#### `GET /api/auth/me`
+Retrieves current authenticated user's profile summary.
+- **Access**: Authenticated (`@PreAuthorize("isAuthenticated()")`)
+- **Headers**: `Authorization: Bearer <token>`
+- **Response 200 OK**:
+  ```json
+  {
+    "userId": 1,
+    "name": "System Administrator",
+    "email": "vidhi.admin@claimora.internal",
+    "role": "ADMIN",
+    "status": "ACTIVE"
+  }
+  ```
+
+---
+
+#### `GET /api/users`
+Lists users with case-insensitive search and pagination.
+- **Access**: Admin only (`@PreAuthorize("hasRole('ADMIN')")`)
+- **Query Parameters**:
+  - `search` *(optional)*: Matches against user name or email (e.g. `?search=vidhi`).
+  - `page` *(optional, default 0)*: Zero-indexed page number.
+  - `size` *(optional, default 10)*: Page size (max 50).
+- **Response 200 OK**:
+  ```json
+  {
+    "content": [
+      {
+        "userId": 1,
+        "name": "System Administrator",
+        "email": "admin@claimora.internal",
+        "role": "ADMIN",
+        "status": "ACTIVE"
+      }
+    ],
+    "page": 0,
+    "size": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "last": true
+  }
+  ```
+
+---
+
+#### `GET /api/users/{id}`
+Retrieves details for a specific user.
+- **Access**: Admin only (`@PreAuthorize("hasRole('ADMIN')")`)
+- **Response 200 OK**: `UserResponse`
+- **Error Responses**:
+  - `404 Not Found`: User does not exist (`User not found with id: 99`).
+
+---
+
+#### `POST /api/users`
+Creates a new user with custom role and status (Admin provisioning).
+- **Access**: Admin only (`@PreAuthorize("hasRole('ADMIN')")`)
+- **Request Body**:
+  ```json
+  {
+    "name": "Alex Investigator",
+    "email": "alex.investigator@claimora.internal",
+    "password": "InvestigatorPass123!",
+    "role": "INVESTIGATOR",
+    "status": "ACTIVE"
+  }
+  ```
+- **Response 201 Created**: `UserResponse`
+
+---
+
+#### `PUT /api/users/{id}`
+Updates a user's name and email address.
+- **Access**: Admin only (`@PreAuthorize("hasRole('ADMIN')")`)
+- **Request Body**:
+  ```json
+  {
+    "name": "Alex Vance",
+    "email": "alex.vance@claimora.internal"
+  }
+  ```
+- **Response 200 OK**: `UserResponse`
+
+---
+
+#### `PATCH /api/users/{id}/status`
+Activates or deactivates a user account.
+- **Access**: Admin only (`@PreAuthorize("hasRole('ADMIN')")`)
+- **Request Body**:
+  ```json
+  {
+    "status": "INACTIVE"
+  }
+  ```
+- **Response 200 OK**: `UserResponse`
+
+---
+
+#### `PATCH /api/users/{id}/role`
+Updates a user's role assignment.
+- **Access**: Admin only (`@PreAuthorize("hasRole('ADMIN')")`)
+- **Request Body**:
+  ```json
+  {
+    "role": "INVESTIGATOR"
+  }
+  ```
+- **Response 200 OK**: `UserResponse`
+
+---
+
+#### `PUT /api/users/me/password`
+Allows the currently authenticated user to change their password after verifying their current password.
+- **Access**: Authenticated (`@PreAuthorize("isAuthenticated()")`)
+- **Request Body**:
+  ```json
+  {
+    "currentPassword": "OldPassword123!",
+    "newPassword": "NewSecurePassword456!"
+  }
+  ```
+- **Response 200 OK**:
+  ```json
+  {
+    "message": "Password updated successfully"
+  }
+  ```
+- **Error Responses**:
+  - `400 Bad Request`: Current password incorrect or new password validation failed.
 
 ---
 
