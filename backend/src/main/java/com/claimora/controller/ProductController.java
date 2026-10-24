@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.*;
 /**
  * REST controller for Product warranty records.
  * Owner: Shaili (Product)
+ *
+ * Endpoints:
+ *   GET    /api/products          - List and search products (all authenticated roles)
+ *   GET    /api/products/{id}     - Get product by ID (all authenticated roles)
+ *   POST   /api/products          - Register new product (ADMIN, STAFF)
+ *   PUT    /api/products/{id}     - Update product (ADMIN, STAFF)
  */
 @RestController
 @RequestMapping("/api/products")
@@ -54,5 +60,21 @@ public class ProductController {
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
         ProductResponse created = productService.createProduct(request);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    /**
+     * Updates an existing product by ID.
+     * Restricted to ADMIN and STAFF roles (same as create).
+     * Serial number changes are blocked if the product has associated claims —
+     * see ProductService.updateProduct() for the guard logic.
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody ProductRequest request
+    ) {
+        ProductResponse updated = productService.updateProduct(id, request);
+        return ResponseEntity.ok(updated);
     }
 }
