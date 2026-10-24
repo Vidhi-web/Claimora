@@ -1,6 +1,8 @@
 package com.claimora.audit;
 
+import com.claimora.entity.ActionType;
 import com.claimora.entity.Finding;
+import com.claimora.entity.FindingStatus;
 import com.claimora.entity.InvestigationAction;
 import com.claimora.entity.User;
 import com.claimora.repository.InvestigationActionRepository;
@@ -24,8 +26,8 @@ public class AuditTrailLogger {
     /**
      * Appends an immutable audit entry to the investigation timeline.
      */
-    public InvestigationAction logAction(Finding finding, User user, String actionType,
-                                         String explanation, String previousStatus, String newStatus) {
+    public InvestigationAction logAction(Finding finding, User user, ActionType actionType,
+                                         String explanation, FindingStatus previousStatus, FindingStatus newStatus) {
         InvestigationAction action = new InvestigationAction(
                 finding,
                 user,

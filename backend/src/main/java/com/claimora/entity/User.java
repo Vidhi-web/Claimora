@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 /**
- * System user entity.
+ * System user entity mapped to PostgreSQL table 'users'.
  * Owner: Vidhi (User + Authentication)
- * Note: Mapped to table 'users' because 'user' is a reserved keyword in PostgreSQL.
+ * Note: Table is named 'users' because 'user' is a reserved keyword in PostgreSQL.
  */
 @Entity
 @Table(name = "users")
@@ -26,11 +26,13 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 50)
-    private String role; // ADMIN, INVESTIGATOR, STAFF
+    private Role role = Role.STAFF;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
-    private String status = "ACTIVE"; // ACTIVE, INACTIVE
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "created_at", updatable = false)
     private Instant createdAt = Instant.now();
@@ -41,13 +43,18 @@ public class User {
     public User() {
     }
 
-    public User(String name, String email, String passwordHash, String role, String status) {
+    public User(String name, String email, String passwordHash, Role role, UserStatus status) {
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.role = role;
-        this.status = status;
+        this.role = role != null ? role : Role.STAFF;
+        this.status = status != null ? status : UserStatus.ACTIVE;
         this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
         this.updatedAt = Instant.now();
     }
 
@@ -83,19 +90,19 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
-    public String getStatus() {
+    public UserStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(UserStatus status) {
         this.status = status;
     }
 

@@ -1,5 +1,7 @@
 package com.claimora.dto;
 
+import com.claimora.entity.Claim;
+import com.claimora.entity.ClaimStatus;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -16,29 +18,60 @@ public class ClaimResponse {
     private String productSerialNumber;
     private Long userId;
     private String claimantName;
+    private String claimantEmail;
     private String claimNumber;
     private LocalDate claimDate;
-    private String status;
+    private ClaimStatus status;
     private String issueDescription;
     private Instant createdAt;
+    private Instant updatedAt;
+    private long openFindingsCount;
 
     public ClaimResponse() {
     }
 
     public ClaimResponse(Long claimId, Long productId, String productModel, String productSerialNumber,
-                         Long userId, String claimantName, String claimNumber, LocalDate claimDate,
-                         String status, String issueDescription, Instant createdAt) {
+                         Long userId, String claimantName, String claimantEmail, String claimNumber,
+                         LocalDate claimDate, ClaimStatus status, String issueDescription,
+                         Instant createdAt, Instant updatedAt, long openFindingsCount) {
         this.claimId = claimId;
         this.productId = productId;
         this.productModel = productModel;
         this.productSerialNumber = productSerialNumber;
         this.userId = userId;
         this.claimantName = claimantName;
+        this.claimantEmail = claimantEmail;
         this.claimNumber = claimNumber;
         this.claimDate = claimDate;
         this.status = status;
         this.issueDescription = issueDescription;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.openFindingsCount = openFindingsCount;
+    }
+
+    public static ClaimResponse fromEntity(Claim claim) {
+        return fromEntity(claim, 0);
+    }
+
+    public static ClaimResponse fromEntity(Claim claim, long openFindingsCount) {
+        if (claim == null) return null;
+        return new ClaimResponse(
+                claim.getClaimId(),
+                claim.getProduct() != null ? claim.getProduct().getProductId() : null,
+                claim.getProduct() != null ? claim.getProduct().getModel() : null,
+                claim.getProduct() != null ? claim.getProduct().getSerialNumber() : null,
+                claim.getUser() != null ? claim.getUser().getUserId() : null,
+                claim.getUser() != null ? claim.getUser().getName() : null,
+                claim.getUser() != null ? claim.getUser().getEmail() : null,
+                claim.getClaimNumber(),
+                claim.getClaimDate(),
+                claim.getStatus(),
+                claim.getIssueDescription(),
+                claim.getCreatedAt(),
+                claim.getUpdatedAt(),
+                openFindingsCount
+        );
     }
 
     public Long getClaimId() {
@@ -89,6 +122,14 @@ public class ClaimResponse {
         this.claimantName = claimantName;
     }
 
+    public String getClaimantEmail() {
+        return claimantEmail;
+    }
+
+    public void setClaimantEmail(String claimantEmail) {
+        this.claimantEmail = claimantEmail;
+    }
+
     public String getClaimNumber() {
         return claimNumber;
     }
@@ -105,11 +146,11 @@ public class ClaimResponse {
         this.claimDate = claimDate;
     }
 
-    public String getStatus() {
+    public ClaimStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ClaimStatus status) {
         this.status = status;
     }
 
@@ -127,5 +168,21 @@ public class ClaimResponse {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public long getOpenFindingsCount() {
+        return openFindingsCount;
+    }
+
+    public void setOpenFindingsCount(long openFindingsCount) {
+        this.openFindingsCount = openFindingsCount;
     }
 }

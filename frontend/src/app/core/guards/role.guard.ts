@@ -1,19 +1,25 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
-import { UserRole } from '../../models/user.model';
+import { Role } from '../../models/user.model';
 
-export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
-  return () => {
-    const authService = inject(AuthService);
-    const router = inject(Router);
-    const user = authService.currentUser();
+/**
+ * Route guard enforcing role-based permissions based on route.data['roles'].
+ */
+export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-    if (user && allowedRoles.includes(user.role)) {
-      return true;
-    }
+  if (!authService.isAuthenticated()) {
+    return router.createUrlTree(['/auth/login']);
+  }
 
-    router.navigate(['/dashboard']);
-    return false;
-  };
+  const allowedRoles = (route.data?.['roles'] || []) as Role[];
+
+  if (allowedRoles.length === 0 || authService.hasRole(allowedRoles)) {
+    return true;
+  }
+
+  // User lacks permission for this route, redirect to default dashboard
+  return router.createUrlTree(['/dashboard']);
 };

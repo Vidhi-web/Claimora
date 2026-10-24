@@ -2,99 +2,101 @@ package com.claimora.service;
 
 import com.claimora.dto.ClaimRequest;
 import com.claimora.dto.ClaimResponse;
-import com.claimora.entity.Claim;
-import com.claimora.entity.Product;
-import com.claimora.entity.User;
+import com.claimora.entity.*;
 import com.claimora.exception.ResourceNotFoundException;
 import com.claimora.exception.ValidationException;
 import com.claimora.repository.ClaimRepository;
+import com.claimora.repository.FindingRepository;
 import com.claimora.repository.ProductRepository;
 import com.claimora.repository.UserRepository;
+import com.claimora.security.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
- * Service managing claims intake, lifecycle, and DTO conversion.
+ * Service for Claim lifecycle and role-based data filtering.
  * Owner: Tanishka (Claim)
  */
 @Service
-@Transactional
 public class ClaimService {
 
     private final ClaimRepository claimRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final FindingRepository findingRepository;
 
-    public ClaimService(ClaimRepository claimRepository, ProductRepository productRepository, UserRepository userRepository) {
+    public ClaimService(ClaimRepository claimRepository, ProductRepository productRepository,
+                        UserRepository userRepository, FindingRepository findingRepository) {
         this.claimRepository = claimRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.findingRepository = findingRepository;
     }
 
     @Transactional(readOnly = true)
-    public List<ClaimResponse> getAllClaims() {
-        return claimRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<ClaimResponse> getClaimsByStatus(String status) {
-        return claimRepository.findByStatus(status).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public ClaimResponse getClaimById(Long claimId) {
-        Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", claimId));
-        return mapToResponse(claim);
-    }
-
-    public ClaimResponse createClaim(ClaimRequest request) {
-        if (claimRepository.existsByClaimNumber(request.getClaimNumber())) {
-            throw new ValidationException("Claim with number '" + request.getClaimNumber() + "' already exists");
+    public Page<ClaimResponse> getClaims(String search, ClaimStatus status, CustomUserDetails userDetails, Pageable pageable) {
+        Long filterUserId = null;
+        if (userDetails != null && userDetails.getRole() == Role.STAFF) {
+            filterUserId = userDetails.getUserId();
         }
 
+        return claimRepository.findFilteredClaims(filterUserId, status, search, pageable)
+                .map(claim -> {
+                    long openCount = findingRepository.findByClaim_ClaimIdAndStatus(claim.getClaimId(), FindingStatus.OPEN).size();
+                    return ClaimResponse.fromEntity(claim, openCount);
+                });
+    }
+
+    @Transactional(readOnly = true)
+    public ClaimResponse getClaimById(Long claimId, CustomUserDetails userDetails) {
+        Claim claim = claimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
+
+        if (userDetails != null && userDetails.getRole() == Role.STAFF) {
+            if (!claim.getUser().getUserId().equals(userDetails.getUserId())) {
+                throw new AccessDeniedException("You do not have permission to access claims submitted by other users");
+            }
+        }
+
+        long openCount = findingRepository.findByClaim_ClaimIdAndStatus(claim.getClaimId(), FindingStatus.OPEN).size();
+        return ClaimResponse.fromEntity(claim, openCount);
+    }
+
+    @Transactional
+    public ClaimResponse createClaim(ClaimRequest request, CustomUserDetails userDetails) {
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", request.getProductId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + request.getProductId()));
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getUserId()));
+        if (claimRepository.existsByClaimNumber(request.getClaimNumber().trim())) {
+            throw new ValidationException("Claim number " + request.getClaimNumber() + " already exists");
+        }
 
-        LocalDate claimDate = request.getClaimDate() != null ? request.getClaimDate() : LocalDate.now();
+        Long resolvedUserId = request.getUserId();
+        if (resolvedUserId == null) {
+            if (userDetails != null) {
+                resolvedUserId = userDetails.getUserId();
+            } else {
+                throw new ValidationException("Claimant user ID is required");
+            }
+        }
+        final Long targetUserId = resolvedUserId;
+
+        User claimant = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + targetUserId));
 
         Claim claim = new Claim(
                 product,
-                user,
-                request.getClaimNumber(),
-                claimDate,
-                "SUBMITTED",
+                claimant,
+                request.getClaimNumber().trim(),
+                request.getClaimDate(),
+                ClaimStatus.SUBMITTED,
                 request.getIssueDescription()
         );
 
-        Claim savedClaim = claimRepository.save(claim);
-        return mapToResponse(savedClaim);
-    }
-
-    private ClaimResponse mapToResponse(Claim claim) {
-        return new ClaimResponse(
-                claim.getClaimId(),
-                claim.getProduct() != null ? claim.getProduct().getProductId() : null,
-                claim.getProduct() != null ? claim.getProduct().getModel() : null,
-                claim.getProduct() != null ? claim.getProduct().getSerialNumber() : null,
-                claim.getUser() != null ? claim.getUser().getUserId() : null,
-                claim.getUser() != null ? claim.getUser().getName() : null,
-                claim.getClaimNumber(),
-                claim.getClaimDate(),
-                claim.getStatus(),
-                claim.getIssueDescription(),
-                claim.getCreatedAt()
-        );
+        Claim saved = claimRepository.save(claim);
+        return ClaimResponse.fromEntity(saved, 0);
     }
 }

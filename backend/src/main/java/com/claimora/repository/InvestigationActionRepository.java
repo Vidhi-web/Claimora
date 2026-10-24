@@ -7,14 +7,20 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Data repository for InvestigationAction entity.
+ * Spring Data repository for InvestigationAction entity.
+ * Append-only audit trail logging.
  * Owner: Anuj (InvestigationAction)
- * Note: Investigation actions represent an append-only timeline.
  */
 @Repository
 public interface InvestigationActionRepository extends JpaRepository<InvestigationAction, Long> {
 
-    List<InvestigationAction> findByFindingFindingIdOrderByActionTimeAsc(Long findingId);
+    List<InvestigationAction> findByFinding_FindingIdOrderByActionTimeAsc(Long findingId);
 
-    List<InvestigationAction> findByUserUserIdOrderByActionTimeDesc(Long userId);
+    List<InvestigationAction> findByFinding_Claim_ClaimIdOrderByActionTimeAsc(Long claimId);
+
+    List<InvestigationAction> findTop10ByOrderByActionTimeDesc();
+
+    List<InvestigationAction> findTop10ByFinding_Claim_User_UserIdOrderByActionTimeDesc(Long userId);
+
+    long countByFinding_FindingId(Long findingId);
 }
