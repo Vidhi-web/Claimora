@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { Product, CreateProductRequest } from '../models/product.model';
+import { Product, CreateProductRequest, UpdateProductRequest } from '../models/product.model';
 import { PaginatedResponse } from '../models/api-response.model';
 
 @Injectable({
@@ -26,5 +26,14 @@ export class ProductService {
 
   createProduct(request: CreateProductRequest): Observable<Product> {
     return this.api.post<Product>(this.endpoint, request);
+  }
+
+  /**
+   * Updates an existing product via PUT /api/products/{id}.
+   * Note: if the product has associated claims, the backend will reject
+   * any serial number change with HTTP 400 (ValidationException).
+   */
+  updateProduct(id: number, request: UpdateProductRequest): Observable<Product> {
+    return this.api.put<Product>(`${this.endpoint}/${id}`, request);
   }
 }
