@@ -532,27 +532,28 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
     }
 
     .data-table th, .data-table td {
-      padding: 0.85rem 1.25rem;
+      padding: 0.9rem 1.25rem;
       text-align: left;
       border-bottom: 1px solid var(--border-subtle);
     }
 
     .data-table th {
-      background: #0f172a;
+      background: var(--bg-elevated);
       color: var(--text-muted);
       font-weight: 600;
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      border-bottom: 2px solid var(--border-subtle);
     }
 
     .data-table tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--bg-elevated);
     }
 
     .claim-badge {
       font-family: 'JetBrains Mono', monospace;
-      color: #60a5fa;
+      color: var(--primary);
       font-weight: 600;
       cursor: pointer;
       text-decoration: underline;
@@ -601,7 +602,7 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
 
     .date-text {
       color: var(--text-muted);
-      font-size: 0.825rem;
+      font-size: 0.875rem;
     }
 
     .findings-badge {
@@ -654,8 +655,8 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.85rem 1.25rem;
-      background: #0d131f;
+      padding: 0.875rem 1.25rem;
+      background: var(--bg-elevated);
       border-top: 1px solid var(--border-subtle);
     }
 
@@ -722,9 +723,9 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
-      background: #0d131f;
-      padding: 1rem;
-      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      padding: 1.125rem;
+      border-radius: var(--radius-md);
       border: 1px solid var(--border-subtle);
     }
 
@@ -736,32 +737,33 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
 
     .meta-label {
       font-size: 0.75rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      font-weight: 600;
     }
 
     .meta-value {
-      font-size: 0.9rem;
+      font-size: 0.9375rem;
       color: var(--text-main);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .issue-box {
-      background: #131b2e;
+      background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 0.85rem;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.125rem;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.5rem;
     }
 
     .issue-text {
       margin: 0;
       color: var(--text-main);
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.9375rem;
+      line-height: 1.65;
     }
 
     .analysis-action-box {
@@ -769,21 +771,22 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
       padding: 1.25rem;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-md);
     }
 
     .analysis-action-info h4 {
       margin: 0;
-      color: #c4b5fd;
+      color: #6d28d9;
       font-size: 1rem;
+      font-weight: 700;
     }
 
     .analysis-action-info p {
-      margin: 0.2rem 0 0;
-      font-size: 0.825rem;
+      margin: 0.25rem 0 0;
+      font-size: 0.875rem;
       color: var(--text-muted);
     }
 
@@ -824,9 +827,9 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #0b0f19;
-      border-radius: var(--radius-sm);
-      padding: 0.75rem 1.25rem;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 0.875rem 1.375rem;
       border: 1px solid var(--border-subtle);
     }
 
@@ -854,14 +857,14 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
       font-weight: 700;
       color: var(--text-muted);
       letter-spacing: 0.05em;
-      margin-top: 0.2rem;
+      margin-top: 0.25rem;
     }
 
     .result-metrics {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
-      font-size: 0.85rem;
+      gap: 0.375rem;
+      font-size: 0.875rem;
       color: var(--text-main);
     }
 
@@ -880,10 +883,10 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
     }
 
     .finding-item-card {
-      background: #111827;
+      background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 0.85rem;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.125rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
@@ -899,17 +902,18 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #c084fc;
-      background: rgba(192, 132, 252, 0.15);
-      border: 1px solid rgba(192, 132, 252, 0.3);
+      color: #6d28d9;
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
     }
 
     .finding-desc {
       margin: 0;
-      font-size: 0.85rem;
+      font-size: 0.875rem;
       color: var(--text-main);
+      line-height: 1.6;
     }
 
     .linked-docs-strip {
@@ -944,9 +948,9 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
     }
 
     .upload-inline-card {
-      background: #0d131f;
-      border: 1px dashed #3b82f6;
-      border-radius: var(--radius-sm);
+      background: var(--primary-light, #eff6ff);
+      border: 1px dashed var(--primary);
+      border-radius: var(--radius-md);
       padding: 1rem;
       display: flex;
       flex-direction: column;
@@ -964,9 +968,9 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
       font-weight: 700;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
-      background: rgba(59, 130, 246, 0.15);
-      color: #93c5fd;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: var(--info-bg);
+      color: var(--info-text);
+      border: 1px solid var(--info-border);
     }
 
     .file-name {
@@ -976,10 +980,12 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
 
     .hash-code {
       font-size: 0.75rem;
-      color: #94a3b8;
-      background: #0d131f;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
       padding: 0.1rem 0.35rem;
       border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .ocr-status {
@@ -991,31 +997,36 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
     }
 
     .ocr-status.ocr-processed {
-      background: rgba(16, 185, 129, 0.15);
-      color: #6ee7b7;
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid var(--success-border);
     }
 
     .ocr-status.ocr-manual {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fde047;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid var(--warning-border);
     }
 
     .ocr-status.ocr-failed {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid var(--danger-border);
     }
 
     .ocr-status.ocr-pending {
-      background: rgba(148, 163, 184, 0.15);
-      color: #cbd5e1;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
     }
 
     .empty-docs-note {
-      padding: 1rem;
-      background: #0d131f;
-      border-radius: var(--radius-sm);
-      color: var(--text-dim);
-      font-size: 0.85rem;
+      padding: 1.25rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 0.875rem;
       text-align: center;
     }
   `]

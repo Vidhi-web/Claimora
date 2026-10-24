@@ -100,8 +100,8 @@ html, body {
   background-color: var(--bg-app);
   color: var(--text-main);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -129,7 +129,7 @@ code, pre {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 1.25rem 1.5rem;
+  padding: 1.375rem 1.625rem;
   box-shadow: var(--shadow-xs);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
@@ -141,8 +141,8 @@ code, pre {
 /* ─── Buttons ──────────────────────────────────────────────────────────────  */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
-  font-family: inherit; font-size: 0.875rem; font-weight: 500;
-  padding: 0.5rem 1rem;
+  font-family: inherit; font-size: 0.9375rem; font-weight: 500;
+  padding: 0.5625rem 1.0625rem;
   border-radius: var(--radius-sm); border: 1px solid transparent;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
@@ -163,15 +163,15 @@ code, pre {
 .btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
 .btn-ghost:hover:not(:disabled) { background: var(--bg-elevated); color: var(--text-main); }
 
-.btn-sm  { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
-.btn-xs  { padding: 0.2rem 0.5rem;   font-size: 0.75rem; }
-.btn-icon { padding: 0.375rem; width: 32px; height: 32px; }
+.btn-sm  { padding: 0.4375rem 0.875rem; font-size: 0.875rem; }
+.btn-xs  { padding: 0.25rem 0.5625rem; font-size: 0.8125rem; }
+.btn-icon { padding: 0.4375rem; width: 34px; height: 34px; }
 
 /* ─── Status Pills / Badges ───────────────────────────────────────────────── */
 .pill {
   display: inline-flex; align-items: center; gap: 0.25rem;
-  font-size: 0.75rem; font-weight: 600;
-  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem; font-weight: 600;
+  padding: 0.225rem 0.65rem;
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -226,7 +226,7 @@ code, pre {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border-subtle);
 }
-.modal-header h3 { font-size: 1rem; font-weight: 600; color: var(--text-main); margin: 0; }
+.modal-header h3 { font-size: 1.0625rem; font-weight: 600; color: var(--text-main); margin: 0; }
 
 .modal-close {
   background: transparent; border: none;
@@ -254,16 +254,16 @@ code, pre {
 .form-group { display: flex; flex-direction: column; gap: 0.375rem; }
 
 .form-group label {
-  font-size: 0.8125rem; font-weight: 500; color: var(--text-main);
+  font-size: 0.875rem; font-weight: 500; color: var(--text-main);
 }
 
 .form-control {
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
-  padding: 0.5rem 0.75rem;
+  padding: 0.5625rem 0.875rem;
   color: var(--text-main);
-  font-family: inherit; font-size: 0.875rem;
+  font-family: inherit; font-size: 0.9375rem;
   outline: none; width: 100%;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -276,19 +276,19 @@ select.form-control { cursor: pointer; }
 
 /* ─── Data Table (shared) ─────────────────────────────────────────────────── */
 .data-table {
-  width: 100%; border-collapse: collapse; font-size: 0.8125rem;
+  width: 100%; border-collapse: collapse; font-size: 0.875rem;
 }
 .data-table th {
-  padding: 0.625rem 1rem;
+  padding: 0.75rem 1.0625rem;
   text-align: left;
-  font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+  font-size: 0.78rem; font-weight: 600; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: 0.05em;
   background: var(--bg-elevated);
   border-bottom: 1px solid var(--border-subtle);
   white-space: nowrap;
 }
 .data-table td {
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.0625rem;
   border-bottom: 1px solid var(--border-subtle);
   color: var(--text-main);
   vertical-align: middle;
@@ -340,13 +340,27 @@ select.form-control { cursor: pointer; }
 
 /* ─── Page Layout Helpers ─────────────────────────────────────────────────── */
 .page-container {
-  padding: 1.5rem;
-  display: flex; flex-direction: column; gap: 1.25rem;
+  padding: 1.75rem;
+  display: flex; flex-direction: column; gap: 1.375rem;
 }
 
 .page-header {
   display: flex; justify-content: space-between; align-items: flex-start;
   gap: 1rem; flex-wrap: wrap;
+}
+
+/* Page header typography */
+.page-header h1 {
+  font-size: 1.625rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.025em;
+}
+.page-header .subtitle {
+  font-size: 0.9375rem; color: var(--text-muted); margin-top: 0.25rem; line-height: 1.5;
+}
+.badge-tag {
+  display: inline-block;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  background: var(--primary-light); color: var(--primary); border: 1px solid #bfdbfe;
+  padding: 0.2rem 0.625rem; border-radius: var(--radius-full); margin-bottom: 0.375rem;
 }
 
 .header-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
