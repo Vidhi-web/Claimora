@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { Product, CreateProductRequest } from '../../models/product.model';
+import { Product, CreateProductRequest, UpdateProductRequest } from '../../models/product.model';
 
 @Component({
   selector: 'app-products',
@@ -14,8 +14,8 @@ import { Product, CreateProductRequest } from '../../models/product.model';
       <!-- Page Header -->
       <header class="page-header">
         <div>
-          <div class="badge-tag">Registry & Assets</div>
-          <h1>Covered Products & Warranty Registry</h1>
+          <div class="badge-tag">Registry &amp; Assets</div>
+          <h1>Covered Products &amp; Warranty Registry</h1>
           <p class="subtitle">Search product serial numbers, verify active warranty windows, and register new assets.</p>
         </div>
         <div class="header-actions">
@@ -69,6 +69,7 @@ import { Product, CreateProductRequest } from '../../models/product.model';
               <th>Purchase Date</th>
               <th>Warranty Coverage</th>
               <th>Warranty Status</th>
+              <th *ngIf="canManageProducts">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -97,6 +98,15 @@ import { Product, CreateProductRequest } from '../../models/product.model';
                 >
                   {{ isWarrantyActive(p.warrantyEnd) ? 'ACTIVE' : 'EXPIRED' }}
                 </span>
+              </td>
+              <td *ngIf="canManageProducts">
+                <button class="btn-icon btn-edit" (click)="openEditModal(p)" title="Edit product">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                    </path>
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -191,6 +201,85 @@ import { Product, CreateProductRequest } from '../../models/product.model';
             >
               <span *ngIf="submitting" class="spinner"></span>
               <span>Register Product</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT PRODUCT MODAL -->
+      <div class="modal-overlay" *ngIf="showEditModal">
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <h3>Edit Product</h3>
+            <button class="modal-close" (click)="closeEditModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="edit-info-banner">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>If this product has associated claims, its serial number cannot be changed.</span>
+            </div>
+
+            <div class="form-group">
+              <label>Model Name *</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="editProduct.model"
+                placeholder="e.g. Dell XPS 15 9530"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Serial Number *</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="editProduct.serialNumber"
+                placeholder="e.g. SN-XPS15-9530-9921"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Purchase Date *</label>
+              <input
+                type="date"
+                class="form-control"
+                [(ngModel)]="editProduct.purchaseDate"
+                (change)="onEditPurchaseDateChange()"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Warranty Start *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="editProduct.warrantyStart"
+                />
+              </div>
+              <div class="form-group">
+                <label>Warranty End *</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="editProduct.warrantyEnd"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+            <button
+              class="btn btn-primary"
+              [disabled]="submitting || !editProduct.model || !editProduct.serialNumber || !editProduct.purchaseDate || !editProduct.warrantyStart || !editProduct.warrantyEnd"
+              (click)="submitEditProduct()"
+            >
+              <span *ngIf="submitting" class="spinner"></span>
+              <span>Save Changes</span>
             </button>
           </div>
         </div>
@@ -319,6 +408,27 @@ import { Product, CreateProductRequest } from '../../models/product.model';
       font-size: 0.825rem;
     }
 
+    .btn-icon {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.3rem 0.5rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn-edit {
+      color: #c084fc;
+    }
+
+    .btn-edit:hover {
+      background: rgba(192, 132, 252, 0.12);
+      border-color: rgba(192, 132, 252, 0.4);
+    }
+
     .empty-state {
       padding: 4rem 2rem;
       text-align: center;
@@ -395,6 +505,19 @@ import { Product, CreateProductRequest } from '../../models/product.model';
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
     }
+
+    .edit-info-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 0.9rem;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: var(--radius-sm);
+      color: #7dd3fc;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
   `]
 })
 export class ProductsComponent implements OnInit {
@@ -409,6 +532,7 @@ export class ProductsComponent implements OnInit {
   alertMessage: string | null = null;
   alertType: 'success' | 'danger' = 'success';
 
+  // Create modal state
   showCreateModal = false;
   submitting = false;
   newProduct: CreateProductRequest = {
@@ -417,6 +541,17 @@ export class ProductsComponent implements OnInit {
     purchaseDate: new Date().toISOString().substring(0, 10),
     warrantyStart: new Date().toISOString().substring(0, 10),
     warrantyEnd: new Date(Date.now() + 2 * 365 * 24 * 3600 * 1000).toISOString().substring(0, 10)
+  };
+
+  // Edit modal state
+  showEditModal = false;
+  editingProductId: number | null = null;
+  editProduct: UpdateProductRequest = {
+    model: '',
+    serialNumber: '',
+    purchaseDate: '',
+    warrantyStart: '',
+    warrantyEnd: ''
   };
 
   constructor(
@@ -460,11 +595,20 @@ export class ProductsComponent implements OnInit {
     this.loadProducts();
   }
 
+  /**
+   * Checks if a warranty is still active.
+   * Uses explicit UTC noon parsing ('T12:00:00Z') to avoid timezone off-by-one errors
+   * where 'YYYY-MM-DD' strings parsed as local midnight can resolve to the previous
+   * calendar day in timezones behind UTC (e.g. IST is UTC+5:30, not behind UTC,
+   * but the fix is correct practice for all environments and ensures consistency).
+   */
   isWarrantyActive(warrantyEnd: string): boolean {
     if (!warrantyEnd) return false;
-    const end = new Date(warrantyEnd);
+    const end = new Date(warrantyEnd + 'T12:00:00Z');
     return end.getTime() >= Date.now();
   }
+
+  // ─── Create Modal ──────────────────────────────────────────────────────────
 
   openCreateModal(): void {
     const today = new Date().toISOString().substring(0, 10);
@@ -482,7 +626,7 @@ export class ProductsComponent implements OnInit {
   onPurchaseDateChange(): void {
     if (this.newProduct.purchaseDate) {
       this.newProduct.warrantyStart = this.newProduct.purchaseDate;
-      const purchaseTime = new Date(this.newProduct.purchaseDate).getTime();
+      const purchaseTime = new Date(this.newProduct.purchaseDate + 'T12:00:00Z').getTime();
       const twoYears = 2 * 365 * 24 * 3600 * 1000;
       this.newProduct.warrantyEnd = new Date(purchaseTime + twoYears).toISOString().substring(0, 10);
     }
@@ -497,7 +641,7 @@ export class ProductsComponent implements OnInit {
       next: (created) => {
         this.submitting = false;
         this.showCreateModal = false;
-        this.showAlert(`Product ${created.model} registered successfully!`, 'success');
+        this.showAlert(`Product "${created.model}" registered successfully!`, 'success');
         this.loadProducts();
       },
       error: (err) => {
@@ -506,6 +650,56 @@ export class ProductsComponent implements OnInit {
       }
     });
   }
+
+  // ─── Edit Modal ────────────────────────────────────────────────────────────
+
+  openEditModal(product: Product): void {
+    this.editingProductId = product.productId;
+    this.editProduct = {
+      model: product.model,
+      serialNumber: product.serialNumber,
+      purchaseDate: product.purchaseDate,
+      warrantyStart: product.warrantyStart,
+      warrantyEnd: product.warrantyEnd
+    };
+    this.showEditModal = true;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editingProductId = null;
+  }
+
+  onEditPurchaseDateChange(): void {
+    if (this.editProduct.purchaseDate) {
+      // Sync warrantyStart to purchaseDate only if it's earlier (avoids overwriting valid start dates)
+      if (!this.editProduct.warrantyStart || this.editProduct.warrantyStart < this.editProduct.purchaseDate) {
+        this.editProduct.warrantyStart = this.editProduct.purchaseDate;
+      }
+    }
+  }
+
+  submitEditProduct(): void {
+    if (!this.editingProductId || !this.editProduct.model || !this.editProduct.serialNumber) {
+      return;
+    }
+    this.submitting = true;
+    this.productService.updateProduct(this.editingProductId, this.editProduct).subscribe({
+      next: (updated) => {
+        this.submitting = false;
+        this.showEditModal = false;
+        this.editingProductId = null;
+        this.showAlert(`Product "${updated.model}" updated successfully!`, 'success');
+        this.loadProducts();
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.showAlert(err.error?.message || 'Failed to update product', 'danger');
+      }
+    });
+  }
+
+  // ─── Utilities ─────────────────────────────────────────────────────────────
 
   private showAlert(message: string, type: 'success' | 'danger'): void {
     this.alertMessage = message;
