@@ -166,6 +166,9 @@ code, pre {
 .btn-sm  { padding: 0.4375rem 0.875rem; font-size: 0.875rem; }
 .btn-xs  { padding: 0.25rem 0.5625rem; font-size: 0.8125rem; }
 .btn-icon { padding: 0.4375rem; width: 34px; height: 34px; }
+.refresh-btn { display: inline-flex; align-items: center; gap: 0.375rem; }
+.refresh-icon { flex-shrink: 0; transition: transform 0.3s ease; }
+.refresh-btn.spinning .refresh-icon { animation: spin 0.8s linear infinite; }
 
 /* ─── Status Pills / Badges ───────────────────────────────────────────────── */
 .pill {
