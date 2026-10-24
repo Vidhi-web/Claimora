@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.*;
  * Authentication REST Controller.
  * Owner: Vidhi (User + Authentication)
  */
+@Tag(name = "Authentication", description = "Login and user profile endpoints")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
+    
     private final AuthService authService;
 
     public AuthController(AuthService authService) {

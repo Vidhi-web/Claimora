@@ -11,15 +11,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Controller for Investigation Actions and append-only audit enforcement.
  * Owner: Anuj (InvestigationAction)
  */
+@Tag(name = "Investigation", description = "Investigation action timeline management")
 @RestController
 @RequestMapping("/api/investigations")
 public class InvestigationActionController {
+    private static final Logger log = LoggerFactory.getLogger(InvestigationActionController.class);
 
+    
     private final InvestigationActionService actionService;
 
     public InvestigationActionController(InvestigationActionService actionService) {

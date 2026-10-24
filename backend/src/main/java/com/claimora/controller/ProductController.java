@@ -23,10 +23,13 @@ import org.springframework.web.bind.annotation.*;
  *   POST   /api/products          - Register new product (ADMIN, STAFF)
  *   PUT    /api/products/{id}     - Update product (ADMIN, STAFF)
  */
+@Tag(name = "Products", description = "Warranty product registry — create, update, and lookup")
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
+    
     private final ProductService productService;
 
     public ProductController(ProductService productService) {

@@ -7,10 +7,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.Map;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Health check endpoint for system readiness and dev validation.
  */
+@Tag(name = "System", description = "Health check and system status")
 @RestController
 @RequestMapping("/api/health")
 public class HealthController {
