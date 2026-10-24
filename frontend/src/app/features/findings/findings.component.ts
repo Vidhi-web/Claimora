@@ -482,7 +482,7 @@ import { User } from '../../models/user.model';
     }
 
     .evidence-strip {
-      background: #0d131f;
+      background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 0.65rem 0.85rem;
@@ -538,7 +538,7 @@ import { User } from '../../models/user.model';
     .btn-text-action {
       background: transparent;
       border: none;
-      color: #60a5fa;
+      color: #2563eb;
       font-size: 0.75rem;
       cursor: pointer;
       text-decoration: underline;
@@ -571,7 +571,7 @@ import { User } from '../../models/user.model';
     }
 
     .graph-canvas {
-      background: radial-gradient(circle at center, #131b2e 0%, #080c14 100%);
+      background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       padding: 2.5rem 1.5rem;
@@ -591,7 +591,7 @@ import { User } from '../../models/user.model';
     }
 
     .central-node {
-      background: #111827;
+      background: var(--bg-surface);
       min-width: 280px;
     }
 
@@ -633,7 +633,7 @@ import { User } from '../../models/user.model';
 
     .node-claim {
       font-size: 0.8rem;
-      color: #60a5fa;
+      color: #2563eb;
       margin-top: 0.25rem;
     }
 
@@ -676,8 +676,8 @@ import { User } from '../../models/user.model';
     }
 
     .doc-node {
-      background: #172138;
-      border-color: #2e3e60;
+      background: #f0f5ff;
+      border-color: #bfdbfe;
       width: 100%;
     }
 
@@ -692,7 +692,7 @@ import { User } from '../../models/user.model';
     .doc-type-tag {
       font-size: 0.7rem;
       font-weight: 700;
-      color: #93c5fd;
+      color: #1d4ed8;
     }
 
     .doc-id {
@@ -710,7 +710,7 @@ import { User } from '../../models/user.model';
     .doc-hash {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.7rem;
-      color: #64748b;
+      color: var(--text-muted);
     }
 
     .no-evidence-box {
@@ -720,7 +720,7 @@ import { User } from '../../models/user.model';
     }
 
     .finding-details-box {
-      background: #0d131f;
+      background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 1rem;
@@ -777,14 +777,14 @@ import { User } from '../../models/user.model';
       height: 12px;
       border-radius: 50%;
       background: #3b82f6;
-      border: 2px solid #0b0f19;
+      border: 2px solid #f8fafc;
     }
 
     .timeline-content {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
-      background: #0d131f;
+      background: var(--bg-elevated);
       padding: 0.75rem 1rem;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-subtle);
@@ -799,7 +799,7 @@ import { User } from '../../models/user.model';
 
     .act-type {
       font-weight: 700;
-      color: #60a5fa;
+      color: #2563eb;
     }
 
     .act-user {
@@ -839,15 +839,15 @@ import { User } from '../../models/user.model';
     }
 
     .alert-banner.success {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: #6ee7b7;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #166534;
     }
 
     .alert-banner.danger {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      color: #fca5a5;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
     }
 
     .close-alert {
