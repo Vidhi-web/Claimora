@@ -751,6 +751,11 @@ export class DashboardComponent implements OnInit {
   }
 
   refreshDashboard(): void {
+    // Clear existing data so skeleton loaders are always visible
+    this.stats        = null;
+    this.recentClaims = [];
+    this.statsError   = null;
+    this.claimsError  = null;
     this.loadStats();
     this.loadRecentClaims();
   }
