@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 @RestController
 @RequestMapping("/api/health")
 public class HealthController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HealthController.class);
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> checkHealth() {

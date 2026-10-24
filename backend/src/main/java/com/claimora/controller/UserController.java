@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * Password changes are accessible to any authenticated user.
  * Owner: Vidhi (User + Authentication)
  */
-@Tag(name = "Users", description = "User management — create, update, role assignment (Admin only)")
+@Tag(name = "Users", description = "User management - create, update, role assignment (Admin only)")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
