@@ -578,9 +578,10 @@ import { EvidenceDocument, DocumentType } from '../../models/evidence.model';
 
     .serial-code {
       font-size: 0.75rem;
-      color: #94a3b8;
-      background: #0d131f;
-      padding: 0.1rem 0.35rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      color: #1e40af;
+      background: #dbeafe;
+      padding: 0.1rem 0.4rem;
       border-radius: 4px;
       width: fit-content;
     }
