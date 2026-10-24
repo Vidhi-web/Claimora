@@ -47,7 +47,7 @@ public class EvidenceDocument {
     @Column(name = "ocr_status", nullable = false, length = 50)
     private String ocrStatus = "PENDING"; // PENDING, PROCESSED, FAILED, MANUAL
 
-    @Column(name = "extracted_data", columnDefinition = "jsonb")
+    @Column(name = "extracted_data", columnDefinition = "text")
     private String extractedData = "{}";
 
     @Column(name = "upload_date", updatable = false)
