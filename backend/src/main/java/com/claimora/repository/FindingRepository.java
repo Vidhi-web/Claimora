@@ -40,6 +40,18 @@ public interface FindingRepository extends JpaRepository<Finding, Long> {
     @Query("SELECT f.ruleCode, COUNT(f) FROM Finding f GROUP BY f.ruleCode ORDER BY COUNT(f) DESC")
     List<Object[]> countGroupByRuleCode();
 
+    /** Single query: all status counts in one DB round-trip */
+    @Query("SELECT f.status, COUNT(f) FROM Finding f GROUP BY f.status")
+    List<Object[]> countGroupedByStatus();
+
+    /** Single query: all severity counts in one DB round-trip */
+    @Query("SELECT f.severity, COUNT(f) FROM Finding f GROUP BY f.severity")
+    List<Object[]> countGroupedBySeverity();
+
+    /** Single query: status counts scoped to a user's claims */
+    @Query("SELECT f.status, COUNT(f) FROM Finding f WHERE f.claim.user.userId = :userId GROUP BY f.status")
+    List<Object[]> countGroupedByStatusForUser(@Param("userId") Long userId);
+
     @Query("SELECT f FROM Finding f WHERE " +
            "(:assignedToId IS NULL OR (f.assignedTo IS NOT NULL AND f.assignedTo.userId = :assignedToId)) AND " +
            "(:status IS NULL OR f.status = :status) AND " +

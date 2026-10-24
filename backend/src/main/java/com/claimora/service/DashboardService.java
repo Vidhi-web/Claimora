@@ -19,6 +19,7 @@ import java.util.UUID;
 /**
  * Service for aggregating system-wide and role-scoped KPI metrics,
  * fraud rule frequencies, and summary investigation reports.
+ * Optimized: uses grouped aggregate queries to minimise Supabase round-trips.
  */
 @Service
 public class DashboardService {
@@ -56,67 +57,88 @@ public class DashboardService {
         DashboardStatsResponse.SystemMetrics systemMetrics;
 
         if (isStaff && userId != null) {
-            // Staff-scoped metrics
-            long total = claimRepository.countByUser_UserId(userId);
-            long submitted = claimRepository.countByUser_UserIdAndStatus(userId, ClaimStatus.SUBMITTED);
-            long underReview = claimRepository.countByUser_UserIdAndStatus(userId, ClaimStatus.UNDER_REVIEW);
-            long flagged = claimRepository.countByUser_UserIdAndStatus(userId, ClaimStatus.FLAGGED);
-            long resolved = claimRepository.countByUser_UserIdAndStatus(userId, ClaimStatus.RESOLVED);
-            double fraudRate = total > 0 ? (double) (flagged * 100) / total : 0.0;
-            claimMetrics = new DashboardStatsResponse.ClaimMetrics(total, submitted, underReview, flagged, resolved, Math.round(fraudRate * 10.0) / 10.0);
+            // Staff: 1 claim-group query + 1 finding-group query (instead of 9 separate counts)
+            long[] cc = extractClaimCounts(claimRepository.countGroupedByStatusForUser(userId));
+            double fraudRate = cc[0] > 0 ? (double)(cc[3] * 100) / cc[0] : 0.0;
+            claimMetrics = new DashboardStatsResponse.ClaimMetrics(cc[0], cc[1], cc[2], cc[3], cc[4],
+                    Math.round(fraudRate * 10.0) / 10.0);
 
-            long totalFindings = findingRepository.countByClaim_User_UserId(userId);
-            long openFindings = findingRepository.countByClaim_User_UserIdAndStatus(userId, FindingStatus.OPEN);
-            long underInv = findingRepository.countByClaim_User_UserIdAndStatus(userId, FindingStatus.UNDER_INVESTIGATION);
-            long resolvedFindings = findingRepository.countByClaim_User_UserIdAndStatus(userId, FindingStatus.RESOLVED);
-            long dismissed = findingRepository.countByClaim_User_UserIdAndStatus(userId, FindingStatus.DISMISSED);
-            findingMetrics = new DashboardStatsResponse.FindingMetrics(totalFindings, openFindings, underInv, resolvedFindings, dismissed, 0, 0, 0);
+            long[] fc = extractFindingStatusCounts(findingRepository.countGroupedByStatusForUser(userId));
+            findingMetrics = new DashboardStatsResponse.FindingMetrics(fc[0], fc[1], fc[2], fc[3], fc[4], 0, 0, 0);
 
             topTriggeredRules = List.of();
-            recentActivities = actionRepository.findTop10ByFinding_Claim_User_UserIdOrderByActionTimeDesc(userId).stream()
-                    .map(InvestigationActionResponse::fromEntity)
-                    .toList();
-            systemMetrics = new DashboardStatsResponse.SystemMetrics(0, documentRepository.countByClaim_User_UserId(userId), 0);
+            recentActivities = actionRepository
+                    .findTop10ByFinding_Claim_User_UserIdOrderByActionTimeDesc(userId).stream()
+                    .map(InvestigationActionResponse::fromEntity).toList();
+            systemMetrics = new DashboardStatsResponse.SystemMetrics(0,
+                    documentRepository.countByClaim_User_UserId(userId), 0);
         } else {
-            // Admin and Investigator platform-wide metrics
-            long total = claimRepository.count();
-            long submitted = claimRepository.countByStatus(ClaimStatus.SUBMITTED);
-            long underReview = claimRepository.countByStatus(ClaimStatus.UNDER_REVIEW);
-            long flagged = claimRepository.countByStatus(ClaimStatus.FLAGGED);
-            long resolved = claimRepository.countByStatus(ClaimStatus.RESOLVED);
-            double fraudRate = total > 0 ? (double) (flagged * 100) / total : 0.0;
-            claimMetrics = new DashboardStatsResponse.ClaimMetrics(total, submitted, underReview, flagged, resolved, Math.round(fraudRate * 10.0) / 10.0);
+            // Admin/Investigator: grouped queries (8 queries instead of 18)
+            long[] cc = extractClaimCounts(claimRepository.countGroupedByStatus());
+            double fraudRate = cc[0] > 0 ? (double)(cc[3] * 100) / cc[0] : 0.0;
+            claimMetrics = new DashboardStatsResponse.ClaimMetrics(cc[0], cc[1], cc[2], cc[3], cc[4],
+                    Math.round(fraudRate * 10.0) / 10.0);
 
-            long totalFindings = findingRepository.count();
-            long openFindings = findingRepository.countByStatus(FindingStatus.OPEN);
-            long underInv = findingRepository.countByStatus(FindingStatus.UNDER_INVESTIGATION);
-            long resolvedFindings = findingRepository.countByStatus(FindingStatus.RESOLVED);
-            long dismissed = findingRepository.countByStatus(FindingStatus.DISMISSED);
-            long highSev = findingRepository.countBySeverity(FindingSeverity.HIGH);
-            long medSev = findingRepository.countBySeverity(FindingSeverity.MEDIUM);
-            long lowSev = findingRepository.countBySeverity(FindingSeverity.LOW);
-            findingMetrics = new DashboardStatsResponse.FindingMetrics(totalFindings, openFindings, underInv, resolvedFindings, dismissed, highSev, medSev, lowSev);
+            long[] fc = extractFindingStatusCounts(findingRepository.countGroupedByStatus());
+            long highSev = 0, medSev = 0, lowSev = 0;
+            for (Object[] row : findingRepository.countGroupedBySeverity()) {
+                String sev = row[0].toString();
+                long cnt = ((Number) row[1]).longValue();
+                if ("HIGH".equals(sev)) highSev = cnt;
+                else if ("MEDIUM".equals(sev)) medSev = cnt;
+                else if ("LOW".equals(sev)) lowSev = cnt;
+            }
+            findingMetrics = new DashboardStatsResponse.FindingMetrics(
+                    fc[0], fc[1], fc[2], fc[3], fc[4], highSev, medSev, lowSev);
 
             topTriggeredRules = findingRepository.countGroupByRuleCode().stream()
-                    .map(row -> {
-                        String code = (String) row[0];
-                        long count = ((Number) row[1]).longValue();
-                        return new RuleTriggerStat(code, formatRuleName(code), count);
-                    })
+                    .map(row -> new RuleTriggerStat(
+                            (String) row[0], formatRuleName((String) row[0]),
+                            ((Number) row[1]).longValue()))
                     .toList();
 
             recentActivities = actionRepository.findTop10ByOrderByActionTimeDesc().stream()
-                    .map(InvestigationActionResponse::fromEntity)
-                    .toList();
+                    .map(InvestigationActionResponse::fromEntity).toList();
 
             systemMetrics = new DashboardStatsResponse.SystemMetrics(
                     productRepository.count(),
                     documentRepository.count(),
-                    documentRepository.countByOcrStatus("MANUAL")
-            );
+                    documentRepository.countByOcrStatus("MANUAL"));
         }
 
         return new DashboardStatsResponse(claimMetrics, findingMetrics, topTriggeredRules, recentActivities, systemMetrics);
+    }
+
+    /** Converts grouped [[ClaimStatus, count]] rows to [total, submitted, underReview, flagged, resolved] */
+    private long[] extractClaimCounts(List<Object[]> rows) {
+        long submitted = 0, underReview = 0, flagged = 0, resolved = 0;
+        for (Object[] row : rows) {
+            String s = row[0].toString();
+            long n = ((Number) row[1]).longValue();
+            switch (s) {
+                case "SUBMITTED"    -> submitted   = n;
+                case "UNDER_REVIEW" -> underReview = n;
+                case "FLAGGED"      -> flagged      = n;
+                case "RESOLVED"     -> resolved     = n;
+            }
+        }
+        return new long[]{submitted + underReview + flagged + resolved, submitted, underReview, flagged, resolved};
+    }
+
+    /** Converts grouped [[FindingStatus, count]] rows to [total, open, underInv, resolved, dismissed] */
+    private long[] extractFindingStatusCounts(List<Object[]> rows) {
+        long open = 0, underInv = 0, resolved = 0, dismissed = 0;
+        for (Object[] row : rows) {
+            String s = row[0].toString();
+            long n = ((Number) row[1]).longValue();
+            switch (s) {
+                case "OPEN"                -> open      = n;
+                case "UNDER_INVESTIGATION" -> underInv  = n;
+                case "RESOLVED"            -> resolved  = n;
+                case "DISMISSED"           -> dismissed = n;
+            }
+        }
+        return new long[]{open + underInv + resolved + dismissed, open, underInv, resolved, dismissed};
     }
 
     @Transactional(readOnly = true)
@@ -151,13 +173,13 @@ public class DashboardService {
     private String formatRuleName(String code) {
         if (code == null) return "";
         return switch (code) {
-            case "DUPLICATE_INVOICE" -> "Duplicate Invoice Detection";
-            case "SERIAL_REUSE" -> "Serial Number Reuse";
-            case "DATE_CONFLICT" -> "Warranty & Date Timeline Conflict";
-            case "INVOICE_MISMATCH" -> "Invoice vs Product Mismatch";
-            case "DUPLICATE_PHOTO" -> "Duplicate Photograph Detection";
-            case "REPAIR_PARTS_MISMATCH" -> "Repair vs Parts Billing Mismatch";
-            default -> code.replace("_", " ");
+            case "DUPLICATE_INVOICE"    -> "Duplicate Invoice Detection";
+            case "SERIAL_REUSE"         -> "Serial Number Reuse";
+            case "DATE_CONFLICT"        -> "Warranty & Date Timeline Conflict";
+            case "INVOICE_MISMATCH"     -> "Invoice vs Product Mismatch";
+            case "DUPLICATE_PHOTO"      -> "Duplicate Photograph Detection";
+            case "REPAIR_PARTS_MISMATCH"-> "Repair vs Parts Billing Mismatch";
+            default                     -> code.replace("_", " ");
         };
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -34,6 +35,14 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     long countByUser_UserIdAndStatus(Long userId, ClaimStatus status);
 
     List<Claim> findTop5ByStatusOrderByCreatedAtDesc(ClaimStatus status);
+
+    /** Single query: returns [[status, count], ...] for ALL statuses — one DB round-trip */
+    @Query("SELECT c.status, COUNT(c) FROM Claim c GROUP BY c.status")
+    List<Object[]> countGroupedByStatus();
+
+    /** Single query: returns [[status, count], ...] scoped to a user */
+    @Query("SELECT c.status, COUNT(c) FROM Claim c WHERE c.user.userId = :userId GROUP BY c.status")
+    List<Object[]> countGroupedByStatusForUser(@Param("userId") Long userId);
 
     @Query("SELECT c FROM Claim c WHERE " +
            "(:userId IS NULL OR c.user.userId = :userId) AND " +
