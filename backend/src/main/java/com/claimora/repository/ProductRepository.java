@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -26,4 +27,25 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "LOWER(p.serialNumber) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.model) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Product> searchProducts(@Param("query") String query, Pageable pageable);
+
+    /**
+     * Returns true if any Claim references this product.
+     * Used to guard serial number changes in updateProduct —
+     * modifying the serial when claims exist would corrupt fraud-detection findings.
+     */
+    @Query("SELECT COUNT(c) > 0 FROM Claim c WHERE c.product.productId = :productId")
+    boolean hasClaimsForProduct(@Param("productId") Long productId);
+
+    /**
+     * Returns the count of claims associated with a given product.
+     * Useful for displaying claim activity on the product list.
+     */
+    @Query("SELECT COUNT(c) FROM Claim c WHERE c.product.productId = :productId")
+    long countClaimsByProductId(@Param("productId") Long productId);
+
+    /**
+     * Finds products whose warranty ends on or before the given date (expired warranties).
+     * Useful for audit queries and dashboard statistics.
+     */
+    long countByWarrantyEndBefore(LocalDate date);
 }

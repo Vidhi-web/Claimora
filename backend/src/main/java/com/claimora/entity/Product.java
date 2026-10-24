@@ -33,7 +33,7 @@ public class Product {
     private LocalDate warrantyEnd;
 
     @Column(name = "created_at", updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     public Product() {
     }
@@ -44,7 +44,19 @@ public class Product {
         this.purchaseDate = purchaseDate;
         this.warrantyStart = warrantyStart;
         this.warrantyEnd = warrantyEnd;
-        this.createdAt = Instant.now();
+    }
+
+    /**
+     * Sets createdAt exactly once at persist time.
+     * Using @PrePersist avoids the double-initialization bug
+     * (field default + constructor) and ensures the JVM clock is
+     * consistent with the DB row's actual insertion time.
+     */
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
     }
 
     public Long getProductId() {
