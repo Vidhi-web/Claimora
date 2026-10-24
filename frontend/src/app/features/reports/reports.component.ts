@@ -225,8 +225,8 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
       justify-content: space-between;
       gap: 1.5rem;
       flex-wrap: wrap;
-      background: #0d131f;
-      border-left: 4px solid #38bdf8;
+      background: #eff6ff;
+      border-left: 4px solid #2563eb;
       padding: 1rem 1.5rem;
     }
 
@@ -246,7 +246,7 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
     .meta-code {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
-      color: #38bdf8;
+      color: #1d4ed8;
     }
 
     .meta-val {
@@ -359,7 +359,7 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.8rem;
       font-weight: 700;
-      color: #38bdf8;
+      color: #1d4ed8;
     }
 
     .rule-name {
@@ -370,7 +370,7 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
     .bar-container {
       flex: 1;
       height: 8px;
-      background: #0b0f19;
+      background: #e2e8f0;
       border-radius: 9999px;
       overflow: hidden;
       border: 1px solid var(--border-subtle);
@@ -404,8 +404,8 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
     }
 
     .data-table th {
-      background: #0f172a;
-      color: var(--text-muted);
+      background: var(--bg-elevated);
+      color: var(--text-dim);
       font-weight: 600;
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -414,15 +414,16 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
 
     .code-claim {
       font-family: 'JetBrains Mono', monospace;
-      color: #60a5fa;
+      color: #1d4ed8;
       font-weight: 600;
     }
 
     .action-tag {
       font-size: 0.75rem;
       font-weight: 700;
-      color: #93c5fd;
-      background: rgba(59, 130, 246, 0.12);
+      color: #1d4ed8;
+      background: #dbeafe;
+      border: 1px solid #bfdbfe;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
     }
