@@ -307,9 +307,9 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
       display: inline-block;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #c084fc;
-      background: rgba(192, 132, 252, 0.15);
-      border: 1px solid rgba(192, 132, 252, 0.3);
+      color: #7c3aed;
+      background: #ede9fe;
+      border: 1px solid #c4b5fd;
       padding: 0.2rem 0.6rem;
       border-radius: var(--radius-full);
       margin-bottom: 0.5rem;
@@ -371,8 +371,8 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
     }
 
     .data-table th {
-      background: #0f172a;
-      color: var(--text-muted);
+      background: var(--bg-elevated);
+      color: var(--text-dim);
       font-weight: 600;
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -380,7 +380,7 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
     }
 
     .data-table tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--bg-elevated);
     }
 
     .id-dim {
@@ -391,11 +391,11 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
     .serial-badge {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.8rem;
-      color: #38bdf8;
-      background: #0d131f;
+      color: #1d4ed8;
+      background: #dbeafe;
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
+      border: 1px solid #bfdbfe;
     }
 
     .model-name {
@@ -421,12 +421,12 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
     }
 
     .btn-edit {
-      color: #c084fc;
+      color: #7c3aed;
     }
 
     .btn-edit:hover {
-      background: rgba(192, 132, 252, 0.12);
-      border-color: rgba(192, 132, 252, 0.4);
+      background: #ede9fe;
+      border-color: #c4b5fd;
     }
 
     .empty-state {
@@ -448,7 +448,7 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
       align-items: center;
       justify-content: space-between;
       padding: 0.85rem 1.25rem;
-      background: #0d131f;
+      background: var(--bg-elevated);
       border-top: 1px solid var(--border-subtle);
     }
 
@@ -472,15 +472,15 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
     }
 
     .alert-banner.success {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: #6ee7b7;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #166534;
     }
 
     .alert-banner.danger {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      color: #fca5a5;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
     }
 
     .close-alert {
@@ -511,10 +511,10 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
       align-items: center;
       gap: 0.5rem;
       padding: 0.65rem 0.9rem;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       border-radius: var(--radius-sm);
-      color: #7dd3fc;
+      color: #1d4ed8;
       font-size: 0.8rem;
       margin-bottom: 1rem;
     }
