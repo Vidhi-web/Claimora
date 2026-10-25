@@ -1,3 +1,4 @@
+import 'zone.js'; // Must be first — enables zone-based change detection
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
