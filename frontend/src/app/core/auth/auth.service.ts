@@ -4,56 +4,37 @@ import { Router } from '@angular/router';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { LoginRequest, LoginResponse, User, Role } from '../../models/user.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly baseUrl = '/api/auth';
-  private readonly SESSION_TOKEN_KEY = 'claimora_session_token';
-  private readonly SESSION_USER_KEY = 'claimora_session_user';
+  private readonly TOKEN_KEY = 'claimora_token';
+  private readonly USER_KEY  = 'claimora_user';
 
-  // Token in memory plus sessionStorage for persistence across page refreshes
-  private tokenInMemory: string | null = null;
+  private readonly tokenSignal = signal<string | null>(null);
+  readonly currentUser     = signal<User | null>(null);
+  readonly isAuthenticated = computed(() => !!this.tokenSignal() && !!this.currentUser());
+  readonly isAdmin         = computed(() => this.currentUser()?.role === 'ADMIN');
+  readonly isInvestigator  = computed(() => this.currentUser()?.role === 'INVESTIGATOR');
+  readonly isStaff         = computed(() => this.currentUser()?.role === 'STAFF');
 
-  readonly currentUser = signal<User | null>(null);
-  readonly isAuthenticated = computed(() => !!this.getToken() && !!this.currentUser());
-  readonly isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
-  readonly isInvestigator = computed(() => this.currentUser()?.role === 'INVESTIGATOR');
-  readonly isStaff = computed(() => this.currentUser()?.role === 'STAFF');
-
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
+  constructor(private http: HttpClient, private router: Router) {
     this.restoreSession();
   }
 
+  getToken(): string | null { return this.tokenSignal(); }
+
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/login`, credentials).pipe(
-      tap(response => {
-        this.setSession(response.token, response.user);
-      })
+      tap(res => this.setSession(res.token, res.user))
     );
   }
 
   logout(): void {
-    this.tokenInMemory = null;
-    sessionStorage.removeItem(this.SESSION_TOKEN_KEY);
-    sessionStorage.removeItem(this.SESSION_USER_KEY);
+    this.tokenSignal.set(null);
     this.currentUser.set(null);
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
     this.router.navigate(['/auth/login']);
-  }
-
-  getToken(): string | null {
-    if (this.tokenInMemory) {
-      return this.tokenInMemory;
-    }
-    const sessionToken = sessionStorage.getItem(this.SESSION_TOKEN_KEY);
-    if (sessionToken) {
-      this.tokenInMemory = sessionToken;
-      return sessionToken;
-    }
-    return null;
   }
 
   hasRole(allowedRoles: Role[] | Role): boolean {
@@ -64,41 +45,42 @@ export class AuthService {
   }
 
   fetchProfile(): Observable<User | null> {
-    const token = this.getToken();
-    if (!token) {
-      return of(null);
-    }
+    if (!this.tokenSignal()) return of(null);
     return this.http.get<User>(`${this.baseUrl}/me`).pipe(
       tap(user => {
         this.currentUser.set(user);
-        sessionStorage.setItem(this.SESSION_USER_KEY, JSON.stringify(user));
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
       }),
-      catchError(() => {
-        this.logout();
-        return of(null);
-      })
+      catchError(() => { this.logout(); return of(null); })
     );
   }
 
   private setSession(token: string, user: User): void {
-    this.tokenInMemory = token;
-    sessionStorage.setItem(this.SESSION_TOKEN_KEY, token);
-    sessionStorage.setItem(this.SESSION_USER_KEY, JSON.stringify(user));
+    this.tokenSignal.set(token);
     this.currentUser.set(user);
+    localStorage.setItem(this.TOKEN_KEY, token);
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
   }
 
   private restoreSession(): void {
-    const token = sessionStorage.getItem(this.SESSION_TOKEN_KEY);
-    const userJson = sessionStorage.getItem(this.SESSION_USER_KEY);
-
-    if (token && userJson) {
-      try {
-        this.tokenInMemory = token;
-        const user = JSON.parse(userJson) as User;
-        this.currentUser.set(user);
-      } catch {
-        this.logout();
+    const token    = localStorage.getItem(this.TOKEN_KEY);
+    const userJson = localStorage.getItem(this.USER_KEY);
+    if (!token || !userJson) return;
+    try {
+      // Decode JWT payload and check expiry client-side
+      const payload    = JSON.parse(atob(token.split('.')[1]));
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < nowSeconds) {
+        // Already expired — clear and force re-login
+        localStorage.removeItem(this.TOKEN_KEY);
+        localStorage.removeItem(this.USER_KEY);
+        return;
       }
+      this.tokenSignal.set(token);
+      this.currentUser.set(JSON.parse(userJson) as User);
+    } catch {
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.USER_KEY);
     }
   }
 }

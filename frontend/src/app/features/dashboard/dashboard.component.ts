@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { timeout } from 'rxjs/operators';
 import { DashboardService } from '../../services/dashboard.service';
 import { ClaimService } from '../../services/claim.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -766,7 +767,7 @@ export class DashboardComponent implements OnInit {
   loadStats(): void {
     this.statsLoading = true;
     this.statsError   = null;
-    this.dashSvc.getStats().subscribe({
+    this.dashSvc.getStats().pipe(timeout(25000)).subscribe({
       next: data => {
         this.stats        = data;
         this.statsLoading = false;
@@ -776,7 +777,9 @@ export class DashboardComponent implements OnInit {
           : 1;
       },
       error: err => {
-        this.statsError   = err?.error?.message ?? 'Failed to load dashboard metrics. Is the backend running?';
+        this.statsError   = err?.name === 'TimeoutError'
+          ? 'Dashboard timed out — backend may be slow. Click Refresh to retry.'
+          : (err?.error?.message ?? 'Failed to load dashboard metrics.');
         this.statsLoading = false;
       }
     });
@@ -785,13 +788,15 @@ export class DashboardComponent implements OnInit {
   loadRecentClaims(): void {
     this.claimsLoading = true;
     this.claimsError   = null;
-    this.claimSvc.getClaims({ page: 0, size: 5, sortBy: 'claimId', direction: 'DESC' }).subscribe({
+    this.claimSvc.getClaims({ page: 0, size: 5, sortBy: 'claimId', direction: 'DESC' }).pipe(timeout(25000)).subscribe({
       next: data => {
-        this.recentClaims = data.content;
+        this.recentClaims  = data.content;
         this.claimsLoading = false;
       },
-      error: () => {
-        this.claimsError   = 'Failed to load recent claims.';
+      error: err => {
+        this.claimsError   = err?.name === 'TimeoutError'
+          ? 'Timed out loading claims. Click Refresh.'
+          : 'Failed to load recent claims.';
         this.claimsLoading = false;
       }
     });
