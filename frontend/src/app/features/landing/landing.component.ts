@@ -44,9 +44,9 @@ import { AuthService } from '../../core/auth/auth.service';
 
       <!-- Right actions -->
       <div class="lp-nav-actions">
-        <a *ngIf="!authService.isAuthenticated()" id="nav-signin" routerLink="/auth/login" class="lp-nav-signin">Sign In</a>
-        <a *ngIf="authService.isAuthenticated()" id="nav-dashboard" routerLink="/dashboard" class="lp-nav-signin lp-nav-dashboard">Go to Dashboard &rarr;</a>
-        <button id="nav-demo" class="lp-nav-demo" (click)="scrollTo('cta')">Request a Demo</button>
+        <a id="nav-signin" routerLink="/auth/login" class="lp-nav-signin">Sign In</a>
+        <a *ngIf="authService.isAuthenticated()" id="nav-dashboard" routerLink="/dashboard" class="lp-nav-cta">Go to Dashboard &rarr;</a>
+        <a *ngIf="!authService.isAuthenticated()" id="nav-getstarted" routerLink="/auth/login" class="lp-nav-cta">Get Started &rarr;</a>
         <button class="lp-hamburger" (click)="toggleMenu()"
                 [attr.aria-expanded]="menuOpen" aria-label="Toggle mobile menu">
           <svg *ngIf="!menuOpen" width="20" height="20" viewBox="0 0 24 24"
@@ -72,9 +72,10 @@ import { AuthService } from '../../core/auth/auth.service';
       <a (click)="scrollTo('problems')">Solutions</a>
       <a (click)="scrollTo('cta')">About</a>
       <div class="mm-divider"></div>
-      <a *ngIf="!authService.isAuthenticated()" routerLink="/auth/login" class="mm-signin">Sign In</a>
+      <a routerLink="/auth/login" class="mm-signin">Sign In</a>
       <a *ngIf="authService.isAuthenticated()" routerLink="/dashboard" class="mm-signin" style="color:var(--cyan)!important">Go to Dashboard &rarr;</a>
-      <button class="mm-demo" (click)="scrollTo('cta')">Request a Demo</button>
+      <a *ngIf="!authService.isAuthenticated()" routerLink="/auth/login" class="mm-demo">Get Started &rarr;</a>
+      <a *ngIf="authService.isAuthenticated()" routerLink="/dashboard" class="mm-demo">Go to Dashboard &rarr;</a>
     </div>
   </header>
 
@@ -108,14 +109,17 @@ import { AuthService } from '../../core/auth/auth.service';
         </p>
 
         <div class="hero-ctas">
-          <button id="cta-explore" class="btn-cyan" (click)="scrollTo('features')">
-            Explore the Platform
+          <a id="cta-explore" class="btn-cyan" [routerLink]="authService.isAuthenticated() ? '/dashboard' : '/auth/login'">
+            {{ authService.isAuthenticated() ? 'Go to Dashboard' : 'Sign In to Dashboard' }}
             <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
             </svg>
-          </button>
-          <button id="cta-investigation" class="btn-outline" (click)="scrollTo('platform')">
-            View Sample Investigation
+          </a>
+          <a *ngIf="authService.isAuthenticated()" routerLink="/auth/login" class="btn-outline" id="cta-switch-user">
+            Sign In with Another Account
+          </a>
+          <button *ngIf="!authService.isAuthenticated()" id="cta-investigation" class="btn-outline" (click)="scrollTo('features')">
+            Explore Features
           </button>
         </div>
 
@@ -583,14 +587,13 @@ import { AuthService } from '../../core/auth/auth.service';
           </li>
         </ul>
         <div class="preview-ctas">
-          <button class="btn-cyan" (click)="scrollTo('cta')">
-            Request a Demo
+          <a [routerLink]="authService.isAuthenticated() ? '/dashboard' : '/auth/login'" class="btn-cyan">
+            {{ authService.isAuthenticated() ? 'Go to Dashboard' : 'Sign In to Dashboard' }}
             <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
             </svg>
-          </button>
-          <a *ngIf="!authService.isAuthenticated()" routerLink="/auth/login" class="btn-outline">Sign In to Explore</a>
-          <a *ngIf="authService.isAuthenticated()" routerLink="/dashboard" class="btn-outline">Go to Dashboard &rarr;</a>
+          </a>
+          <a routerLink="/auth/login" class="btn-outline">Sign In</a>
         </div>
       </div>
     </div>
@@ -610,12 +613,12 @@ import { AuthService } from '../../core/auth/auth.service';
         </p>
         <div class="cta-buttons">
           <a [routerLink]="authService.isAuthenticated() ? '/dashboard' : '/auth/login'" class="btn-cyan btn-lg">
-            {{ authService.isAuthenticated() ? 'Go to Dashboard' : 'Explore the Platform' }}
+            {{ authService.isAuthenticated() ? 'Go to Dashboard' : 'Sign In to Dashboard' }}
             <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
             </svg>
           </a>
-          <button class="btn-outline btn-lg" (click)="scrollTo('how-it-works')">Request a Demo</button>
+          <a routerLink="/auth/login" class="btn-outline btn-lg">Sign In to Account</a>
         </div>
       </div>
     </div>
@@ -660,9 +663,9 @@ import { AuthService } from '../../core/auth/auth.service';
       </div>
       <div class="footer-col">
         <h4 class="footer-col-title">Account</h4>
-        <a *ngIf="!authService.isAuthenticated()" routerLink="/auth/login">Sign In</a>
+        <a routerLink="/auth/login">Sign In</a>
         <a *ngIf="authService.isAuthenticated()" routerLink="/dashboard">Dashboard</a>
-        <a (click)="scrollTo('cta')">Request a Demo</a>
+        <a routerLink="/auth/login">Switch Account</a>
       </div>
     </div>
 
@@ -761,6 +764,15 @@ import { AuthService } from '../../core/auth/auth.service';
   transition: color .15s;
 }
 .lp-nav-signin:hover { color: var(--text); }
+.lp-nav-cta {
+  background: var(--cyan); color: #000 !important;
+  font-size: .875rem; font-weight: 700;
+  padding: .45rem 1.1rem; border: none; border-radius: 7px;
+  transition: background .15s, transform .1s;
+  display: inline-flex; align-items: center; gap: .375rem;
+  text-decoration: none !important;
+}
+.lp-nav-cta:hover { background: #0ad5f9; transform: translateY(-1px); }
 .lp-nav-dashboard { color: var(--cyan) !important; font-weight: 600 !important; }
 .lp-nav-dashboard:hover { text-decoration: underline; }
 
