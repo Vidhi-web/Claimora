@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardService } from '../../services/dashboard.service';
 import { ReportSummaryResponse } from '../../models/dashboard.model';
@@ -20,7 +20,7 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
           <button class="btn btn-secondary btn-sm print-btn" (click)="printReport()">
             🖨️ Print / Export PDF
           </button>
-          <button class="btn btn-primary btn-sm" (click)="loadReport()">
+          <button class="btn btn-primary btn-sm" (click)="loadReport(true)">
             🔄 Regenerate Report
           </button>
         </div>
@@ -106,32 +106,44 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
             <span class="tag-flagged">Requires Immediate Review</span>
           </div>
 
-          <table class="data-table" *ngIf="report.flaggedClaims.length > 0; else noFlagged">
-            <thead>
-              <tr>
-                <th>Claim Number</th>
-                <th>Product Model</th>
-                <th>Claimant</th>
-                <th>Claim Date</th>
-                <th>Findings Count</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let c of report.flaggedClaims">
-                <td><code class="code-claim">{{ c.claimNumber }}</code></td>
-                <td>{{ c.productModel || 'Product #' + c.productId }}</td>
-                <td>{{ c.claimantName || 'Claimant' }}</td>
-                <td>{{ c.claimDate | date:'mediumDate' }}</td>
-                <td>
-                  <span class="pill pill-flagged">{{ c.openFindingsCount || 1 }} Active</span>
-                </td>
-                <td>
-                  <span class="pill pill-flagged">{{ c.status }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-wrap" *ngIf="report.flaggedClaims.length > 0; else noFlagged">
+            <table class="data-table flagged-table">
+              <colgroup>
+                <col style="width: 19%;">
+                <col style="width: 25%;">
+                <col style="width: 17%;">
+                <col style="width: 14%;">
+                <col style="width: 12%;">
+                <col style="width: 13%;">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Claim Number</th>
+                  <th>Product Model</th>
+                  <th>Claimant</th>
+                  <th>Claim Date</th>
+                  <th>Findings</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of report.flaggedClaims">
+                  <td><code class="code-claim">{{ c.claimNumber }}</code></td>
+                  <td class="text-truncate" [title]="c.productModel || 'Product #' + c.productId">
+                    {{ c.productModel || 'Product #' + c.productId }}
+                  </td>
+                  <td>{{ c.claimantName || 'Claimant' }}</td>
+                  <td>{{ c.claimDate | date:'mediumDate' }}</td>
+                  <td>
+                    <span class="pill pill-flagged">{{ c.openFindingsCount || 1 }} Active</span>
+                  </td>
+                  <td>
+                    <span class="pill pill-flagged">{{ c.status }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <ng-template #noFlagged>
             <div class="empty-note">No claims currently flagged for fraud!</div>
           </ng-template>
@@ -142,28 +154,38 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
           <h3>Recent Forensic Audit Trail Actions</h3>
           <p class="section-desc">Append-only investigation timeline documenting investigator actions and resolutions.</p>
 
-          <table class="data-table" *ngIf="report.recentAuditLog.length > 0; else noLog">
-            <thead>
-              <tr>
-                <th>Action ID</th>
-                <th>Type</th>
-                <th>Finding</th>
-                <th>Investigator</th>
-                <th>Explanation</th>
-                <th>Timestamp</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let a of report.recentAuditLog">
-                <td>#{{ a.actionId }}</td>
-                <td><span class="action-tag">{{ a.actionType }}</span></td>
-                <td>Finding #{{ a.findingId }}</td>
-                <td>{{ a.userName || 'Investigator' }}</td>
-                <td class="explanation-cell">"{{ a.explanation }}"</td>
-                <td class="time-cell">{{ a.actionTime | date:'short' }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-wrap" *ngIf="report.recentAuditLog.length > 0; else noLog">
+            <table class="data-table audit-table">
+              <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 17%;">
+                <col style="width: 13%;">
+                <col style="width: 15%;">
+                <col style="width: 31%;">
+                <col style="width: 14%;">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Action ID</th>
+                  <th>Type</th>
+                  <th>Finding</th>
+                  <th>Investigator</th>
+                  <th>Explanation</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let a of report.recentAuditLog">
+                  <td>#{{ a.actionId }}</td>
+                  <td><span class="action-tag">{{ a.actionType }}</span></td>
+                  <td>Finding #{{ a.findingId }}</td>
+                  <td>{{ a.userName || 'Investigator' }}</td>
+                  <td class="explanation-cell">"{{ a.explanation }}"</td>
+                  <td class="time-cell">{{ a.actionTime | date:'short' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <ng-template #noLog>
             <div class="empty-note">No investigation actions recorded in recent log.</div>
           </ng-template>
@@ -192,9 +214,9 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
       display: inline-block;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #0369a1;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
       padding: 0.2rem 0.6rem;
       border-radius: var(--radius-full);
       margin-bottom: 0.5rem;
@@ -391,58 +413,91 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
       text-align: right;
     }
 
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
     .data-table {
       width: 100%;
+      table-layout: fixed;
       border-collapse: collapse;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
     }
 
     .data-table th, .data-table td {
-      padding: 0.75rem 1rem;
+      padding: 0.65rem 0.75rem;
       text-align: left;
       border-bottom: 1px solid var(--border-subtle);
+      overflow-wrap: break-word;
+      word-break: break-word;
+      vertical-align: middle;
     }
 
     .data-table th {
       background: var(--bg-elevated);
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-weight: 600;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+    }
+
+    .text-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .code-claim {
       font-family: 'JetBrains Mono', monospace;
       color: #1d4ed8;
       font-weight: 600;
+      font-size: 0.8rem;
+      white-space: nowrap;
     }
 
     .action-tag {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: #1d4ed8;
       background: #dbeafe;
       border: 1px solid #bfdbfe;
-      padding: 0.15rem 0.45rem;
+      padding: 0.15rem 0.4rem;
       border-radius: 4px;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+      line-height: 1.2;
     }
 
     .explanation-cell {
       font-style: italic;
       color: var(--text-main);
       font-size: 0.85rem;
+      line-height: 1.35;
     }
 
     .time-cell {
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-size: 0.8rem;
+      white-space: nowrap;
     }
 
     .empty-note {
       padding: 1.5rem;
       text-align: center;
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-size: 0.85rem;
     }
 
@@ -455,10 +510,214 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
       color: var(--text-muted);
     }
 
+    @page {
+      size: auto;
+      margin: 8mm 10mm;
+    }
+
     @media print {
       .header-actions { display: none !important; }
-      body { background: white !important; color: black !important; }
-      .claimora-card { border: 1px solid #ccc !important; box-shadow: none !important; background: white !important; color: black !important; }
+
+      .page-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        gap: 0.75rem !important;
+      }
+
+      .report-header {
+        margin-bottom: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+        border-bottom: 2px solid #0f172a !important;
+      }
+
+      .badge-tag {
+        font-size: 0.65rem !important;
+        padding: 0.1rem 0.4rem !important;
+        margin-bottom: 0.25rem !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .report-header h1 {
+        font-size: 1.35rem !important;
+        color: #0f172a !important;
+        margin: 0.2rem 0 !important;
+      }
+
+      .subtitle {
+        font-size: 0.78rem !important;
+        color: #475569 !important;
+      }
+
+      .report-meta-card {
+        padding: 0.5rem 0.75rem !important;
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        border-left: 4px solid #2563eb !important;
+        margin-bottom: 0.25rem !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .meta-item {
+        gap: 0.1rem !important;
+      }
+
+      .meta-label {
+        font-size: 0.65rem !important;
+        color: #64748b !important;
+      }
+
+      .meta-code, .meta-val {
+        font-size: 0.75rem !important;
+      }
+
+      .classification-badge {
+        font-size: 0.65rem !important;
+        padding: 0.15rem 0.45rem !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.5rem !important;
+        margin-bottom: 0.25rem !important;
+      }
+
+      .kpi-card {
+        padding: 0.5rem 0.65rem !important;
+        border: 1px solid #e2e8f0 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+      }
+
+      .kpi-title {
+        font-size: 0.65rem !important;
+      }
+
+      .kpi-num {
+        font-size: 1.35rem !important;
+        margin: 0.1rem 0 !important;
+      }
+
+      .kpi-sub {
+        font-size: 0.65rem !important;
+      }
+
+      .section-card {
+        padding: 0.75rem 0.85rem !important;
+        border: 1px solid #e2e8f0 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 0.5rem !important;
+      }
+
+      .section-card h3 {
+        font-size: 0.95rem !important;
+        color: #0f172a !important;
+      }
+
+      .section-desc {
+        font-size: 0.72rem !important;
+        margin: -0.25rem 0 0.5rem !important;
+      }
+
+      .tag-flagged {
+        font-size: 0.65rem !important;
+        padding: 0.1rem 0.4rem !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .table-wrap {
+        overflow: visible !important;
+        width: 100% !important;
+      }
+
+      .data-table {
+        table-layout: fixed !important;
+        width: 100% !important;
+        font-size: 0.72rem !important;
+      }
+
+      .data-table th, .data-table td {
+        padding: 4px 6px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+
+      .data-table th {
+        background: #f1f5f9 !important;
+        color: #334155 !important;
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .code-claim {
+        font-size: 0.7rem !important;
+        color: #1d4ed8 !important;
+      }
+
+      .action-tag {
+        font-size: 0.65rem !important;
+        padding: 1px 4px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .pill {
+        font-size: 0.65rem !important;
+        padding: 1px 4px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .explanation-cell {
+        font-size: 0.7rem !important;
+        line-height: 1.25 !important;
+      }
+
+      .time-cell {
+        font-size: 0.68rem !important;
+        white-space: nowrap;
+      }
+
+      .rule-bar-row {
+        gap: 0.5rem !important;
+      }
+
+      .rule-info {
+        width: 200px !important;
+      }
+
+      .rule-code {
+        font-size: 0.7rem !important;
+      }
+
+      .rule-name {
+        font-size: 0.65rem !important;
+      }
+
+      .bar-container {
+        height: 6px !important;
+        background: #e2e8f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .bar-fill {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .rule-count {
+        font-size: 0.7rem !important;
+      }
     }
   `]
 })
@@ -466,21 +725,26 @@ export class ReportsComponent implements OnInit {
   report: ReportSummaryResponse | null = null;
   loading = false;
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadReport();
   }
 
-  loadReport(): void {
+  loadReport(forceRefresh = false): void {
     this.loading = true;
-    this.dashboardService.getSummaryReport().subscribe({
+    this.dashboardService.getSummaryReport(forceRefresh).subscribe({
       next: (res) => {
         this.report = res;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

@@ -46,11 +46,17 @@ public class FindingService {
             targetAssignedToId = userDetails.getUserId();
         }
 
-        return findingRepository.findFilteredFindings(targetAssignedToId, status, severity, claimId, pageable)
-                .map(finding -> {
-                    long actionCount = actionRepository.countByFinding_FindingId(finding.getFindingId());
-                    return FindingResponse.fromEntity(finding, List.of(), actionCount);
-                });
+        Page<Finding> page = findingRepository.findFilteredFindings(targetAssignedToId, status, severity, claimId, pageable);
+        List<Long> findingIds = page.getContent().stream().map(Finding::getFindingId).toList();
+        java.util.Map<Long, Long> actionCounts = new java.util.HashMap<>();
+        if (!findingIds.isEmpty()) {
+            List<Object[]> rows = actionRepository.countActionsByFindingIds(findingIds);
+            for (Object[] row : rows) {
+                actionCounts.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+            }
+        }
+
+        return page.map(finding -> FindingResponse.fromEntity(finding, List.of(), actionCounts.getOrDefault(finding.getFindingId(), 0L)));
     }
 
     @Transactional(readOnly = true)

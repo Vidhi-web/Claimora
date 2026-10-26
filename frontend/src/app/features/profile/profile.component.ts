@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
@@ -186,7 +186,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -207,6 +208,7 @@ export class ProfileComponent implements OnInit {
     const parts = (u.name || '').trim().split(' ');
     const initials = parts.map(p => p[0]).join('').slice(0, 2).toUpperCase();
     this.userInitials.set(initials || 'U');
+    this.cdr.detectChanges();
   }
 
   onChangePassword(): void {

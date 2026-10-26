@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -35,7 +36,24 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
 
     List<Claim> findTop5ByStatusOrderByCreatedAtDesc(ClaimStatus status);
 
-    @Query("SELECT c FROM Claim c WHERE " +
+    /** Single query: returns [[status, count], ...] for ALL statuses — one DB round-trip */
+    @Query("SELECT c.status, COUNT(c) FROM Claim c GROUP BY c.status")
+    List<Object[]> countGroupedByStatus();
+
+    /** Single query: returns [[status, count], ...] scoped to a user */
+    @Query("SELECT c.status, COUNT(c) FROM Claim c WHERE c.user.userId = :userId GROUP BY c.status")
+    List<Object[]> countGroupedByStatusForUser(@Param("userId") Long userId);
+
+    @Query(value = "SELECT c FROM Claim c " +
+           "LEFT JOIN FETCH c.product " +
+           "LEFT JOIN FETCH c.user " +
+           "WHERE (:userId IS NULL OR c.user.userId = :userId) AND " +
+           "(:status IS NULL OR c.status = :status) AND " +
+           "(:search IS NULL OR :search = '' OR " +
+           "LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(c.product.serialNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(c.product.model) LIKE LOWER(CONCAT('%', :search, '%')))",
+           countQuery = "SELECT COUNT(c) FROM Claim c WHERE " +
            "(:userId IS NULL OR c.user.userId = :userId) AND " +
            "(:status IS NULL OR c.status = :status) AND " +
            "(:search IS NULL OR :search = '' OR " +

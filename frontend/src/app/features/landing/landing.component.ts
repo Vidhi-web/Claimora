@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-landing',
@@ -43,7 +44,8 @@ import { RouterLink } from '@angular/router';
 
       <!-- Right actions -->
       <div class="lp-nav-actions">
-        <a id="nav-signin" routerLink="/auth/login" class="lp-nav-signin">Sign In</a>
+        <a *ngIf="!authService.isAuthenticated()" id="nav-signin" routerLink="/auth/login" class="lp-nav-signin">Sign In</a>
+        <a *ngIf="authService.isAuthenticated()" id="nav-dashboard" routerLink="/dashboard" class="lp-nav-signin lp-nav-dashboard">Go to Dashboard &rarr;</a>
         <button id="nav-demo" class="lp-nav-demo" (click)="scrollTo('cta')">Request a Demo</button>
         <button class="lp-hamburger" (click)="toggleMenu()"
                 [attr.aria-expanded]="menuOpen" aria-label="Toggle mobile menu">
@@ -70,7 +72,8 @@ import { RouterLink } from '@angular/router';
       <a (click)="scrollTo('problems')">Solutions</a>
       <a (click)="scrollTo('cta')">About</a>
       <div class="mm-divider"></div>
-      <a routerLink="/auth/login" class="mm-signin">Sign In</a>
+      <a *ngIf="!authService.isAuthenticated()" routerLink="/auth/login" class="mm-signin">Sign In</a>
+      <a *ngIf="authService.isAuthenticated()" routerLink="/dashboard" class="mm-signin" style="color:var(--cyan)!important">Go to Dashboard &rarr;</a>
       <button class="mm-demo" (click)="scrollTo('cta')">Request a Demo</button>
     </div>
   </header>
@@ -586,7 +589,8 @@ import { RouterLink } from '@angular/router';
               <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
             </svg>
           </button>
-          <a routerLink="/auth/login" class="btn-outline">Sign In to Explore</a>
+          <a *ngIf="!authService.isAuthenticated()" routerLink="/auth/login" class="btn-outline">Sign In to Explore</a>
+          <a *ngIf="authService.isAuthenticated()" routerLink="/dashboard" class="btn-outline">Go to Dashboard &rarr;</a>
         </div>
       </div>
     </div>
@@ -605,8 +609,8 @@ import { RouterLink } from '@angular/router';
           structured workflow. No additional BI tools required.
         </p>
         <div class="cta-buttons">
-          <a routerLink="/auth/login" class="btn-cyan btn-lg">
-            Explore the Platform
+          <a [routerLink]="authService.isAuthenticated() ? '/dashboard' : '/auth/login'" class="btn-cyan btn-lg">
+            {{ authService.isAuthenticated() ? 'Go to Dashboard' : 'Explore the Platform' }}
             <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
             </svg>
@@ -656,7 +660,8 @@ import { RouterLink } from '@angular/router';
       </div>
       <div class="footer-col">
         <h4 class="footer-col-title">Account</h4>
-        <a routerLink="/auth/login">Sign In</a>
+        <a *ngIf="!authService.isAuthenticated()" routerLink="/auth/login">Sign In</a>
+        <a *ngIf="authService.isAuthenticated()" routerLink="/dashboard">Dashboard</a>
         <a (click)="scrollTo('cta')">Request a Demo</a>
       </div>
     </div>
@@ -756,6 +761,8 @@ import { RouterLink } from '@angular/router';
   transition: color .15s;
 }
 .lp-nav-signin:hover { color: var(--text); }
+.lp-nav-dashboard { color: var(--cyan) !important; font-weight: 600 !important; }
+.lp-nav-dashboard:hover { text-decoration: underline; }
 
 .lp-nav-demo {
   background: var(--cyan); color: #000;
@@ -1346,6 +1353,8 @@ export class LandingComponent implements OnInit, OnDestroy {
   menuOpen  = false;
   scrolled  = false;
   currentYear = new Date().getFullYear();
+
+  constructor(public authService: AuthService) {}
 
   @HostListener('window:scroll')
   onWindowScroll(): void {

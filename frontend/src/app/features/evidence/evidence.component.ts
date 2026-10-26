@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EvidenceService } from '../../services/evidence.service';
@@ -352,7 +352,7 @@ import { Claim } from '../../models/claim.model';
     }
 
     .data-table th {
-      background: #0f172a;
+      background: var(--bg-elevated);
       color: var(--text-muted);
       font-weight: 600;
       font-size: 0.8rem;
@@ -361,7 +361,7 @@ import { Claim } from '../../models/claim.model';
     }
 
     .data-table tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--bg-elevated);
     }
 
     .id-dim {
@@ -378,27 +378,27 @@ import { Claim } from '../../models/claim.model';
     }
 
     .doc-badge.invoice {
-      background: rgba(59, 130, 246, 0.15);
-      color: #93c5fd;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
     }
 
     .doc-badge.photo {
-      background: rgba(168, 85, 247, 0.15);
-      color: #d8b4fe;
-      border: 1px solid rgba(168, 85, 247, 0.3);
+      background: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #ddd6fe;
     }
 
     .doc-badge.repair_report {
-      background: rgba(16, 185, 129, 0.15);
-      color: #86efac;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
     }
 
     .doc-badge.parts_invoice {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fde047;
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
     }
 
     .file-cell {
@@ -426,8 +426,9 @@ import { Claim } from '../../models/claim.model';
     .hash-code {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.75rem;
-      color: #94a3b8;
-      background: #0d131f;
+      color: #334155;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
       padding: 0.15rem 0.4rem;
       border-radius: 4px;
     }
@@ -447,7 +448,7 @@ import { Claim } from '../../models/claim.model';
 
     .claim-ref {
       font-weight: 600;
-      color: #60a5fa;
+      color: #1d4ed8;
     }
 
     .ocr-status {
@@ -460,27 +461,27 @@ import { Claim } from '../../models/claim.model';
     }
 
     .ocr-status.ocr-processed {
-      background: rgba(16, 185, 129, 0.15);
-      color: #6ee7b7;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
     }
 
     .ocr-status.ocr-manual {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fde047;
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
     }
 
     .ocr-status.ocr-failed {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
     .ocr-status.ocr-pending {
-      background: rgba(148, 163, 184, 0.15);
-      color: #cbd5e1;
-      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
     }
 
     .table-actions {
@@ -506,11 +507,12 @@ import { Claim } from '../../models/claim.model';
 
     .info-note {
       font-size: 0.8rem;
-      color: var(--text-muted);
-      background: #0d131f;
+      color: #1e40af;
+      background: #eff6ff;
       padding: 0.75rem;
       border-radius: var(--radius-sm);
-      border-left: 3px solid #3b82f6;
+      border: 1px solid #bfdbfe;
+      border-left: 3px solid #2563eb;
     }
 
     .ocr-dialog {
@@ -526,7 +528,7 @@ import { Claim } from '../../models/claim.model';
       display: flex;
       flex-direction: column;
       gap: 0.6rem;
-      background: #0d131f;
+      background: var(--bg-elevated);
       padding: 0.85rem;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-subtle);
@@ -534,9 +536,10 @@ import { Claim } from '../../models/claim.model';
 
     .meta-label {
       font-size: 0.75rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
       text-transform: uppercase;
       margin-right: 0.5rem;
+      font-weight: 600;
     }
 
     .meta-value {
@@ -548,7 +551,7 @@ import { Claim } from '../../models/claim.model';
     .hash-code-full {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.75rem;
-      color: #38bdf8;
+      color: #1d4ed8;
       word-break: break-all;
     }
 
@@ -556,7 +559,9 @@ import { Claim } from '../../models/claim.model';
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
       line-height: 1.4;
-      background: #090d16;
+      background: #ffffff;
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
     }
 
     .field-hint {
@@ -629,7 +634,8 @@ export class EvidenceComponent implements OnInit {
   constructor(
     private evidenceService: EvidenceService,
     private claimService: ClaimService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -653,9 +659,11 @@ export class EvidenceComponent implements OnInit {
       next: (docs) => {
         this.documents = docs;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.showAlert(err.error?.message || 'Failed to load evidence documents', 'danger');
       }
     });
@@ -665,6 +673,7 @@ export class EvidenceComponent implements OnInit {
     this.claimService.getClaims({ size: 100 }).subscribe({
       next: (res) => {
         this.claims = res.content;
+        this.cdr.detectChanges();
       }
     });
   }

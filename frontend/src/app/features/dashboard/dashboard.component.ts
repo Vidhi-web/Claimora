@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { timeout } from 'rxjs/operators';
 import { DashboardService } from '../../services/dashboard.service';
 import { ClaimService } from '../../services/claim.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -34,6 +35,15 @@ interface DonutSegment {
       </p>
     </div>
     <div class="dash-header-actions">
+      <button id="btn-refresh-dashboard" class="btn btn-secondary btn-sm refresh-btn"
+              (click)="refreshDashboard()"
+              [class.spinning]="statsLoading || claimsLoading"
+              title="Refresh dashboard data">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="refresh-icon">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+        </svg>
+        {{ (statsLoading || claimsLoading) ? 'Loading...' : 'Refresh' }}
+      </button>
       <a id="btn-view-claims" routerLink="/claims" class="btn btn-secondary btn-sm">
         View All Claims &rarr;
       </a>
@@ -153,7 +163,7 @@ interface DonutSegment {
       <div class="donut-wrap" *ngIf="donutSegments.length > 0; else noDonut">
         <!-- SVG Donut -->
         <div class="donut-svg-wrap">
-          <svg viewBox="0 0 180 180" width="160" height="160" aria-label="Claims by status donut chart">
+          <svg viewBox="0 0 180 180" width="135" height="135" aria-label="Claims by status donut chart">
             <g *ngFor="let seg of donutSegments">
               <path [attr.d]="seg.path" [attr.fill]="seg.color" opacity="0.92"/>
             </g>
@@ -161,7 +171,7 @@ interface DonutSegment {
             <text x="90" y="86" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">
               {{ stats.claimMetrics.totalClaims }}
             </text>
-            <text x="90" y="102" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="500">
+            <text x="90" y="102" text-anchor="middle" font-size="10" fill="#64748b" font-weight="600">
               Total Claims
             </text>
           </svg>
@@ -532,11 +542,11 @@ interface DonutSegment {
     /* ══ Charts Row ══ */
     .charts-row {
       display: grid;
-      grid-template-columns: 220px 1fr 200px;
-      gap: .875rem;
-      align-items: start;
+      grid-template-columns: minmax(360px, 1.25fr) minmax(340px, 1.75fr) minmax(220px, 1fr);
+      gap: 1rem;
+      align-items: stretch;
     }
-    @media (max-width: 1200px) {
+    @media (max-width: 1280px) {
       .charts-row { grid-template-columns: 1fr 1fr; }
       .chart-card-narrow { grid-column: 1 / -1; }
     }
@@ -548,6 +558,8 @@ interface DonutSegment {
       border-radius: var(--radius-lg);
       padding: 1.125rem 1.25rem;
       box-shadow: var(--shadow-xs);
+      min-width: 0;
+      overflow: hidden;
     }
     .chart-card-wide   { /* takes fr space */ }
     .chart-card-narrow { /* system metrics */ }
@@ -567,15 +579,45 @@ interface DonutSegment {
     .chart-empty { color: var(--text-dim); font-size: .8125rem; text-align: center; padding: 2rem 0; display: flex; flex-direction: column; align-items: center; gap: .5rem; }
 
     /* ── Donut Chart ── */
-    .donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
-    .donut-svg-wrap { flex-shrink: 0; }
+    .donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .donut-svg-wrap {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    .donut-legend { display: flex; flex-direction: column; gap: .5rem; flex: 1; }
-    .legend-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .legend-label { flex: 1; color: var(--text-muted); }
-    .legend-count { font-weight: 600; color: var(--text-main); }
-    .legend-pct { color: var(--text-dim); min-width: 32px; text-align: right; }
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      flex: 1;
+      min-width: 0;
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      font-size: .8125rem;
+      min-width: 0;
+    }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label {
+      flex: 1;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .legend-count { font-weight: 600; color: var(--text-main); flex-shrink: 0; }
+    .legend-pct { color: var(--text-dim); min-width: 34px; text-align: right; flex-shrink: 0; font-size: .75rem; }
 
     /* ── Rule Bars ── */
     .rules-list { display: flex; flex-direction: column; gap: .875rem; }
@@ -714,6 +756,7 @@ export class DashboardComponent implements OnInit {
   private dashSvc  = inject(DashboardService);
   private claimSvc = inject(ClaimService);
   private router   = inject(Router);
+  private cdr      = inject(ChangeDetectorRef);
 
   // ── State ──
   stats:        DashboardStatsResponse | null = null;
@@ -741,13 +784,23 @@ export class DashboardComponent implements OnInit {
     this.loadRecentClaims();
   }
 
+  refreshDashboard(): void {
+    // Clear existing data so skeleton loaders are always visible
+    this.stats        = null;
+    this.recentClaims = [];
+    this.statsError   = null;
+    this.claimsError  = null;
+    this.loadStats(true);
+    this.loadRecentClaims();
+  }
+
   // ─────────────────────────────────────────────────────────
   // DATA LOADING  (independent: one failure doesn't block the other)
   // ─────────────────────────────────────────────────────────
-  loadStats(): void {
+  loadStats(forceRefresh = false): void {
     this.statsLoading = true;
     this.statsError   = null;
-    this.dashSvc.getStats().subscribe({
+    this.dashSvc.getStats(forceRefresh).pipe(timeout(25000)).subscribe({
       next: data => {
         this.stats        = data;
         this.statsLoading = false;
@@ -755,10 +808,14 @@ export class DashboardComponent implements OnInit {
         this.barMax = data.topTriggeredRules.length
           ? Math.max(...data.topTriggeredRules.map(r => r.count))
           : 1;
+        this.cdr.detectChanges();
       },
       error: err => {
-        this.statsError   = err?.error?.message ?? 'Failed to load dashboard metrics. Is the backend running?';
+        this.statsError   = err?.name === 'TimeoutError'
+          ? 'Dashboard timed out — backend may be slow. Click Refresh to retry.'
+          : (err?.error?.message ?? 'Failed to load dashboard metrics.');
         this.statsLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -766,14 +823,18 @@ export class DashboardComponent implements OnInit {
   loadRecentClaims(): void {
     this.claimsLoading = true;
     this.claimsError   = null;
-    this.claimSvc.getClaims({ page: 0, size: 5, sortBy: 'claimId', direction: 'DESC' }).subscribe({
+    this.claimSvc.getClaims({ page: 0, size: 5, sortBy: 'claimId', direction: 'DESC' }).pipe(timeout(25000)).subscribe({
       next: data => {
-        this.recentClaims = data.content;
+        this.recentClaims  = data.content;
         this.claimsLoading = false;
+        this.cdr.detectChanges();
       },
-      error: () => {
-        this.claimsError   = 'Failed to load recent claims.';
+      error: err => {
+        this.claimsError   = err?.name === 'TimeoutError'
+          ? 'Timed out loading claims. Click Refresh.'
+          : 'Failed to load recent claims.';
         this.claimsLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

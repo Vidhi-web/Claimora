@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InvestigationService } from '../../services/investigation.service';
@@ -107,9 +107,9 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
       display: inline-block;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #10b981;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #047857;
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
       padding: 0.2rem 0.6rem;
       border-radius: var(--radius-full);
       margin-bottom: 0.5rem;
@@ -127,8 +127,9 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
       display: flex;
       align-items: center;
       gap: 1.25rem;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: var(--radius-md);
       padding: 1.25rem;
     }
 
@@ -138,7 +139,7 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
 
     .integrity-text strong {
       display: block;
-      color: #6ee7b7;
+      color: #065f46;
       font-size: 0.95rem;
       margin-bottom: 0.2rem;
     }
@@ -164,7 +165,7 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
     .filter-label {
       font-size: 0.8rem;
       font-weight: 700;
-      color: var(--text-dim);
+      color: var(--text-muted);
       margin-right: 0.4rem;
       text-transform: uppercase;
     }
@@ -227,46 +228,47 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
     }
 
     .action-pill.resolve {
-      background: rgba(16, 185, 129, 0.15);
-      color: #6ee7b7;
-      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
     }
 
     .action-pill.dismiss {
-      background: rgba(100, 116, 139, 0.15);
-      color: #cbd5e1;
-      border: 1px solid rgba(100, 116, 139, 0.4);
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
     }
 
     .action-pill.status_change {
-      background: rgba(59, 130, 246, 0.15);
-      color: #93c5fd;
-      border: 1px solid rgba(59, 130, 246, 0.4);
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
     }
 
     .action-pill.correct_value {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fde047;
-      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
     }
 
     .action-pill.comment {
-      background: rgba(168, 85, 247, 0.15);
-      color: #d8b4fe;
-      border: 1px solid rgba(168, 85, 247, 0.4);
+      background: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #d8b4fe;
     }
 
     .action-pill.request_evidence {
-      background: rgba(236, 72, 153, 0.15);
-      color: #f472b6;
-      border: 1px solid rgba(236, 72, 153, 0.4);
+      background: #fce7f3;
+      color: #9d174d;
+      border: 1px solid #f472b6;
     }
 
     .finding-link {
       font-size: 0.8rem;
       font-weight: 600;
-      color: #60a5fa;
-      background: #0d131f;
+      color: #1e40af;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
     }
@@ -286,14 +288,14 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #1e293b;
-      border: 1px solid var(--border-subtle);
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 0.8rem;
-      color: #38bdf8;
+      color: #1d4ed8;
     }
 
     .author-info {
@@ -314,8 +316,9 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
     }
 
     .explanation-quote {
-      background: #0d131f;
-      border-left: 3px solid #3b82f6;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #2563eb;
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
       padding: 0.75rem 1rem;
       position: relative;
@@ -326,15 +329,16 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
       top: -2px;
       left: 6px;
       font-size: 1.5rem;
-      color: #3b82f6;
-      opacity: 0.4;
+      color: #2563eb;
+      opacity: 0.3;
       line-height: 1;
     }
 
     .quote-text {
       margin: 0;
       font-size: 0.9rem;
-      color: var(--text-main);
+      color: #0f172a;
+      font-weight: 500;
       line-height: 1.5;
       padding-left: 0.75rem;
     }
@@ -344,7 +348,7 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
       align-items: center;
       gap: 0.5rem;
       font-size: 0.8rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
       padding-top: 0.5rem;
       border-top: 1px solid var(--border-subtle);
     }
@@ -364,23 +368,27 @@ import { InvestigationAction, ActionType } from '../../models/investigation.mode
     }
 
     .status-badge.open {
-      background: rgba(59, 130, 246, 0.15);
-      color: #93c5fd;
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
     }
 
     .status-badge.under_investigation {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fde047;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
     }
 
     .status-badge.resolved {
-      background: rgba(16, 185, 129, 0.15);
-      color: #6ee7b7;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
     }
 
     .status-badge.dismissed {
-      background: rgba(100, 116, 139, 0.15);
-      color: #cbd5e1;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
     }
 
     .arrow {
@@ -412,7 +420,10 @@ export class InvestigationsComponent implements OnInit {
   selectedType: ActionType | undefined = undefined;
   loading = false;
 
-  constructor(private investigationService: InvestigationService) {}
+  constructor(
+    private investigationService: InvestigationService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadActions();
@@ -424,9 +435,11 @@ export class InvestigationsComponent implements OnInit {
       next: (acts) => {
         this.actions = acts;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

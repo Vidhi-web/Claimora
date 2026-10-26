@@ -1,7 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from './core/auth/auth.service';
 
 @Component({
@@ -14,12 +15,32 @@ import { AuthService } from './core/auth/auth.service';
 export class App {
   title = 'Claimora';
   sidebarCollapsed = signal(false);
+  isDashboardRoute = signal(false);
   searchQuery = '';
 
   constructor(
     public authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    if (typeof window !== 'undefined') {
+      this.checkRoute(window.location.pathname);
+    }
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.checkRoute(event.urlAfterRedirects || event.url);
+    });
+  }
+
+  private checkRoute(url: string): void {
+    const cleanUrl = url.split('?')[0].split('#')[0];
+    const isPublic = cleanUrl === '/' || cleanUrl === '' || cleanUrl.startsWith('/auth');
+    this.isDashboardRoute.set(!isPublic);
+  }
+
+  isDashboardLayout(): boolean {
+    return this.authService.isAuthenticated() && this.isDashboardRoute();
+  }
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);

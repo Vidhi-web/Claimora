@@ -62,8 +62,13 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Public authentication, dev console, and system health endpoints
-                        .requestMatchers("/api/auth/**", "/api/health", "/error", "/h2-console/**").permitAll()
+                        // Public authentication, dev console, health, and Swagger/OpenAPI docs
+                        .requestMatchers(
+                                "/api/auth/**", "/api/health", "/error", "/h2-console/**",
+                                "/swagger-ui.html", "/swagger-ui/**",
+                                "/v3/api-docs", "/v3/api-docs/**",
+                                "/swagger-resources/**", "/webjars/**"
+                        ).permitAll()
                         // Password change accessible to any logged-in user
                         .requestMatchers("/api/users/me/password").authenticated()
                         // User management restricted to ADMIN role

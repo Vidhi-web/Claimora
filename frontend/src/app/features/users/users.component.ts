@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../services/user.service';
@@ -316,7 +316,10 @@ export class UsersComponent implements OnInit {
 
   newRole: Role = 'STAFF';
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -331,10 +334,12 @@ export class UsersComponent implements OnInit {
         this.totalPages.set(pageData.totalPages);
         this.totalElements.set(pageData.totalElements);
         this.isLoading.set(false);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isLoading.set(false);
         this.errorMessage.set(err.error?.message || 'Failed to load user directory');
+        this.cdr.detectChanges();
       }
     });
   }

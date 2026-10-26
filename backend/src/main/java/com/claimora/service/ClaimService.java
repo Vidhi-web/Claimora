@@ -3,6 +3,7 @@ package com.claimora.service;
 import com.claimora.dto.ClaimRequest;
 import com.claimora.dto.ClaimResponse;
 import com.claimora.entity.*;
+import java.util.List;
 import com.claimora.exception.ResourceNotFoundException;
 import com.claimora.exception.ValidationException;
 import com.claimora.repository.ClaimRepository;
@@ -43,11 +44,17 @@ public class ClaimService {
             filterUserId = userDetails.getUserId();
         }
 
-        return claimRepository.findFilteredClaims(filterUserId, status, search, pageable)
-                .map(claim -> {
-                    long openCount = findingRepository.findByClaim_ClaimIdAndStatus(claim.getClaimId(), FindingStatus.OPEN).size();
-                    return ClaimResponse.fromEntity(claim, openCount);
-                });
+        Page<Claim> claimsPage = claimRepository.findFilteredClaims(filterUserId, status, search, pageable);
+        List<Long> claimIds = claimsPage.getContent().stream().map(Claim::getClaimId).toList();
+        java.util.Map<Long, Long> openCounts = new java.util.HashMap<>();
+        if (!claimIds.isEmpty()) {
+            List<Object[]> rows = findingRepository.countByClaimIdsAndStatus(claimIds, FindingStatus.OPEN);
+            for (Object[] row : rows) {
+                openCounts.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+            }
+        }
+
+        return claimsPage.map(claim -> ClaimResponse.fromEntity(claim, openCounts.getOrDefault(claim.getClaimId(), 0L)));
     }
 
     @Transactional(readOnly = true)

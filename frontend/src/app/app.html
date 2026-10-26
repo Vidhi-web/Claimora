@@ -3,7 +3,7 @@
   <!-- ═══════════════════════════════════════════════════════
        LEFT SIDEBAR — visible only when authenticated
        ═══════════════════════════════════════════════════════ -->
-  <aside class="sidebar" *ngIf="authService.isAuthenticated()">
+  <aside class="sidebar" *ngIf="isDashboardLayout()">
 
     <!-- Brand -->
     <div class="sidebar-brand">
@@ -123,10 +123,10 @@
   <!-- ═══════════════════════════════════════════════════════
        MAIN WRAPPER (header + content)
        ═══════════════════════════════════════════════════════ -->
-  <div class="main-wrapper" [class.with-sidebar]="authService.isAuthenticated()">
+  <div class="main-wrapper" [class.with-sidebar]="isDashboardLayout()">
 
     <!-- ── Top Header ── -->
-    <header class="top-header" *ngIf="authService.isAuthenticated()">
+    <header class="top-header" *ngIf="isDashboardLayout()">
 
       <button id="sidebar-toggle-btn" class="header-btn header-toggle"
               type="button" (click)="toggleSidebar()" aria-label="Toggle sidebar">

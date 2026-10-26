@@ -1,14 +1,17 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
-import { roleGuard } from './core/guards/role.guard';
+import { authGuard }   from './core/guards/auth.guard';
+import { roleGuard }   from './core/guards/role.guard';
+import { publicGuard } from './core/guards/public.guard';
 
 export const routes: Routes = [
+  // ── Public routes ────────────────────────────────────────────────────────
   {
     path: '',
     loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
   {
     path: 'auth/login',
+    canActivate: [publicGuard],
     loadComponent: () => import('./features/auth/auth.component').then(m => m.AuthComponent)
   },
   {
@@ -16,6 +19,8 @@ export const routes: Routes = [
     redirectTo: 'auth/login',
     pathMatch: 'full'
   },
+
+  // ── Protected routes (require auth) ──────────────────────────────────────
   {
     path: 'dashboard',
     canActivate: [authGuard],
@@ -62,5 +67,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
   },
+
+  // ── Fallback ──────────────────────────────────────────────────────────────
   { path: '**', redirectTo: '' }
 ];

@@ -1,29 +1,46 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, ApplicationRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
+import { catchError, delay, finalize, retry, throwError, timer } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
 /**
- * Functional HTTP Interceptor adding the Bearer token and handling 401 Unauthorized errors.
+ * Functional HTTP Interceptor:
+ * 1. Attaches the Bearer token to all /api requests.
+ * 2. Auto-retries 0, 502, 503, 504 errors twice with a 2-second delay
+ *    (handles Supabase/backend cold-start latency).
+ * 3. On 401 Unauthorized: clears session and redirects to login.
+ * 4. Triggers Angular change detection (appRef.tick()) on request finalization
+ *    to ensure all views immediately update with loaded data in all tabs.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const appRef = inject(ApplicationRef);
   const token = authService.getToken();
 
-  let authReq = req;
-
   // Attach token for API calls
-  if (token && req.url.startsWith('/api')) {
-    authReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-  }
+  const authReq = token && req.url.startsWith('/api')
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    : req;
 
   return next(authReq).pipe(
+    // Retry up to 2 times for transient errors (backend cold start / Supabase latency)
+    retry({
+      count: 2,
+      delay: (error: HttpErrorResponse, attempt) => {
+        const retryable = error.status === 0    // network error / ECONNREFUSED
+                       || error.status === 502  // bad gateway (proxy timeout)
+                       || error.status === 503  // service unavailable
+                       || error.status === 504; // gateway timeout
+        if (!retryable) {
+          // Don't retry auth errors or client errors
+          throw error;
+        }
+        // Wait 2s before retry 1, 4s before retry 2
+        return timer(attempt * 2000);
+      }
+    }),
     catchError((error: HttpErrorResponse) => {
       // Handle 401 Unauthorized: clear session and redirect to login
       if (error.status === 401 && !req.url.includes('/api/auth/login')) {
@@ -33,6 +50,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         });
       }
       return throwError(() => error);
+    }),
+    finalize(() => {
+      // Defer tick to next microtask so subscriber has already updated component state
+      queueMicrotask(() => {
+        try {
+          appRef.tick();
+        } catch {}
+      });
     })
   );
 };

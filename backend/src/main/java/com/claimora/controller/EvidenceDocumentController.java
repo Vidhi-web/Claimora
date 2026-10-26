@@ -11,15 +11,21 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Controller for Evidence Document metadata and field corrections.
  * Owner: Kalp (EvidenceDocument)
  */
+@Tag(name = "Evidence", description = "Evidence document upload, OCR processing, and retrieval")
 @RestController
 @RequestMapping("/api/documents")
 public class EvidenceDocumentController {
+    private static final Logger log = LoggerFactory.getLogger(EvidenceDocumentController.class);
 
+    
     private final EvidenceDocumentService documentService;
 
     public EvidenceDocumentController(EvidenceDocumentService documentService) {

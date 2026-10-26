@@ -15,6 +15,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Controller for User management.
@@ -22,10 +25,13 @@ import java.util.Map;
  * Password changes are accessible to any authenticated user.
  * Owner: Vidhi (User + Authentication)
  */
+@Tag(name = "Users", description = "User management - create, update, role assignment (Admin only)")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
+    
     private final UserService userService;
 
     public UserController(UserService userService) {
