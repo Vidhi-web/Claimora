@@ -12,14 +12,15 @@ Claimora is an enterprise-grade forensic investigation platform engineered to au
 ## 📑 Table of Contents
 1. [Core Architectural Highlights](#-core-architectural-highlights)
 2. [Technology Stack](#-technology-stack)
-3. [Quickstart: Running Locally](#-quickstart-running-locally)
-4. [Seed Accounts & Role-Based Access Control (RBAC)](#-seed-accounts--role-based-access-control-rbac)
-5. [Pluggable Fraud Detection Rules Engine](#-pluggable-fraud-detection-rules-engine)
-6. [Investigation Lifecycle & Append-Only Audit Trail](#-investigation-lifecycle--append-only-audit-trail)
-7. [Visual Evidence Graph & Digital Forensics](#-visual-evidence-graph--digital-forensics)
-8. [Automated Test Suite & Verification](#-automated-test-suite--verification)
-9. [Step-by-Step Evaluator Demo Walkthrough](#-step-by-step-evaluator-demo-walkthrough)
-10. [Repository Structure](#-repository-structure)
+3. [Quickstart: Running with Docker (Recommended)](#-quickstart-running-with-docker-recommended)
+4. [Manual Local Development (Without Docker)](#-manual-local-development-without-docker)
+5. [Seed Accounts & Role-Based Access Control (RBAC)](#-seed-accounts--role-based-access-control-rbac)
+6. [Pluggable Fraud Detection Rules Engine](#-pluggable-fraud-detection-rules-engine)
+7. [Investigation Lifecycle & Append-Only Audit Trail](#-investigation-lifecycle--append-only-audit-trail)
+8. [Visual Evidence Graph & Digital Forensics](#-visual-evidence-graph--digital-forensics)
+9. [Automated Test Suite & Verification](#-automated-test-suite--verification)
+10. [Step-by-Step Evaluator Demo Walkthrough](#-step-by-step-evaluator-demo-walkthrough)
+11. [Repository Structure](#-repository-structure)
 
 ---
 
@@ -42,11 +43,46 @@ Claimora is an enterprise-grade forensic investigation platform engineered to au
 | **Backend** | Java 17+, Spring Boot 4.x, Spring Data JPA, Spring Security | Method-level `@PreAuthorize` RBAC, BCrypt password hashing, stateless JWT authentication, HikariCP. |
 | **Document OCR** | Apache PDFBox, Tess4J (Tesseract OCR) | Automated text and field extraction from invoices and receipts. |
 | **Database** | PostgreSQL 16+ (Production) / H2 In-Memory (Dev/Test) | Relational constraints, indexed SHA-256 digests, JSON field persistence. |
+| **Containers** | Docker 20+, Docker Compose, Nginx Alpine | Multi-stage caching, persistent volumes (`pgdata`, `storage`), reverse proxy. |
 | **Build Tools** | Maven Wrapper (`./mvnw`), Angular CLI (`ng`), Postman/Newman | Automated CI test suites, Postman collection v2.1. |
 
 ---
 
-## 🚀 Quickstart: Running Locally
+## 🐳 Quickstart: Running with Docker (Recommended)
+
+Run the entire Claimora platform (**PostgreSQL 16**, **Spring Boot Backend with OCR**, and **Angular Frontend with Nginx**) in one command using Docker Compose:
+
+### 1. Start All Containers
+Make sure **Docker Desktop** is running, then execute from the project root:
+
+```bash
+docker compose up --build -d
+```
+
+### 2. Access the Application
+* 🌐 **Frontend Web App**: **[http://localhost](http://localhost)**
+* 📑 **Interactive Swagger / OpenAPI UI**: **[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)**
+* 🩺 **Backend Health Check**: **[http://localhost:8080/api/health](http://localhost:8080/api/health)**
+* 🐘 **PostgreSQL**: `localhost:5432` (`database: claimora`, `user: postgres`, `password: postgres`)
+
+### 3. Container Management Commands
+```bash
+# View live logs from all services
+docker compose logs -f
+
+# View live backend logs only
+docker compose logs -f backend
+
+# Stop all containers
+docker compose down
+
+# Stop and wipe database volume (fresh clean reset)
+docker compose down -v
+```
+
+---
+
+## 💻 Manual Local Development (Without Docker)
 
 ### Prerequisites
 - **Java 17 JDK** or higher installed (`java -version`)
