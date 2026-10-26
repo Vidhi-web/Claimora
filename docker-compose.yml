@@ -1,0 +1,86 @@
+services:
+  # ═════════════════════════════════════════════════════════════
+  # 1. PostgreSQL Database Service
+  # ═════════════════════════════════════════════════════════════
+  postgres:
+    image: postgres:16-alpine
+    container_name: claimora-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: claimora
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - claimora_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d claimora"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - claimora-network
+
+  # ═════════════════════════════════════════════════════════════
+  # 2. Spring Boot Backend Service (REST API + Tess4J OCR)
+  # ═════════════════════════════════════════════════════════════
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: claimora-backend
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      DB_URL: jdbc:postgresql://postgres:5432/claimora
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_SSL_MODE: disable
+      DDL_AUTO: update
+      STORAGE_PATH: /app/storage/uploads
+      ADMIN_EMAIL: admin@claimora.internal
+      ADMIN_PASSWORD: AdminPass123!
+      ADMIN_NAME: "Claimora Administrator"
+      CORS_ALLOWED_ORIGINS: "http://localhost,http://localhost:80,http://localhost:4200,http://localhost:8080"
+    ports:
+      - "8080:8080"
+    volumes:
+      - claimora_storage:/app/storage/uploads
+      - claimora_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - claimora-network
+
+  # ═════════════════════════════════════════════════════════════
+  # 3. Angular Frontend Service (Nginx Reverse Proxy)
+  # ═════════════════════════════════════════════════════════════
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: claimora-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - claimora-network
+
+# ═════════════════════════════════════════════════════════════
+# Persistent Volumes & Networks
+# ═════════════════════════════════════════════════════════════
+volumes:
+  claimora_pgdata:
+    driver: local
+  claimora_storage:
+    driver: local
+  claimora_logs:
+    driver: local
+
+networks:
+  claimora-network:
+    driver: bridge
