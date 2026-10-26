@@ -16,6 +16,15 @@ import java.util.List;
 @Repository
 public interface EvidenceDocumentRepository extends JpaRepository<EvidenceDocument, Long> {
 
+    @Query("SELECT d FROM EvidenceDocument d LEFT JOIN FETCH d.claim WHERE d.claim.claimId = :claimId ORDER BY d.documentId DESC")
+    List<EvidenceDocument> findByClaimIdWithClaim(@Param("claimId") Long claimId);
+
+    @Query("SELECT d FROM EvidenceDocument d LEFT JOIN FETCH d.claim ORDER BY d.documentId DESC")
+    List<EvidenceDocument> findAllWithClaim();
+
+    @Query("SELECT d FROM EvidenceDocument d LEFT JOIN FETCH d.claim WHERE d.claim.user.userId = :userId ORDER BY d.documentId DESC")
+    List<EvidenceDocument> findByUserIdWithClaim(@Param("userId") Long userId);
+
     List<EvidenceDocument> findByClaim_ClaimId(Long claimId);
 
     List<EvidenceDocument> findByFileHash(String fileHash);

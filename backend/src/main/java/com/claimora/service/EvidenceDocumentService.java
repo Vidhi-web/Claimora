@@ -105,7 +105,7 @@ public class EvidenceDocumentService {
             }
         }
 
-        return documentRepository.findByClaim_ClaimId(claimId)
+        return documentRepository.findByClaimIdWithClaim(claimId)
                 .stream()
                 .map(EvidenceDocumentResponse::fromEntity)
                 .toList();
@@ -118,13 +118,13 @@ public class EvidenceDocumentService {
         }
 
         if (userDetails != null && userDetails.getRole() == Role.STAFF) {
-            return documentRepository.findByClaim_User_UserId(userDetails.getUserId())
+            return documentRepository.findByUserIdWithClaim(userDetails.getUserId())
                     .stream()
                     .map(EvidenceDocumentResponse::fromEntity)
                     .toList();
         }
 
-        return documentRepository.findAll(Sort.by(Sort.Direction.DESC, "documentId"))
+        return documentRepository.findAllWithClaim()
                 .stream()
                 .map(EvidenceDocumentResponse::fromEntity)
                 .toList();

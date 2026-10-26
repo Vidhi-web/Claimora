@@ -44,7 +44,16 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     @Query("SELECT c.status, COUNT(c) FROM Claim c WHERE c.user.userId = :userId GROUP BY c.status")
     List<Object[]> countGroupedByStatusForUser(@Param("userId") Long userId);
 
-    @Query("SELECT c FROM Claim c WHERE " +
+    @Query(value = "SELECT c FROM Claim c " +
+           "LEFT JOIN FETCH c.product " +
+           "LEFT JOIN FETCH c.user " +
+           "WHERE (:userId IS NULL OR c.user.userId = :userId) AND " +
+           "(:status IS NULL OR c.status = :status) AND " +
+           "(:search IS NULL OR :search = '' OR " +
+           "LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(c.product.serialNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(c.product.model) LIKE LOWER(CONCAT('%', :search, '%')))",
+           countQuery = "SELECT COUNT(c) FROM Claim c WHERE " +
            "(:userId IS NULL OR c.user.userId = :userId) AND " +
            "(:status IS NULL OR c.status = :status) AND " +
            "(:search IS NULL OR :search = '' OR " +

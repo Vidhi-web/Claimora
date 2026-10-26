@@ -54,7 +54,7 @@ public class InvestigationActionService {
             }
         }
 
-        return actionRepository.findByFinding_FindingIdOrderByActionTimeAsc(findingId)
+        return actionRepository.findByFindingIdWithDetails(findingId)
                 .stream()
                 .map(InvestigationActionResponse::fromEntity)
                 .toList();
@@ -62,13 +62,14 @@ public class InvestigationActionService {
 
     @Transactional(readOnly = true)
     public List<InvestigationActionResponse> getAllRecentActions(CustomUserDetails userDetails) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 30);
         if (userDetails != null && userDetails.getRole() == Role.STAFF) {
-            return actionRepository.findTop10ByFinding_Claim_User_UserIdOrderByActionTimeDesc(userDetails.getUserId())
+            return actionRepository.findTopByUserIdWithDetails(userDetails.getUserId(), pageable)
                     .stream()
                     .map(InvestigationActionResponse::fromEntity)
                     .toList();
         }
-        return actionRepository.findTop10ByOrderByActionTimeDesc()
+        return actionRepository.findTop10WithDetails(pageable)
                 .stream()
                 .map(InvestigationActionResponse::fromEntity)
                 .toList();

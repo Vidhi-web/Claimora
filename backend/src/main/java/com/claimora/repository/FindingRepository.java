@@ -52,7 +52,19 @@ public interface FindingRepository extends JpaRepository<Finding, Long> {
     @Query("SELECT f.status, COUNT(f) FROM Finding f WHERE f.claim.user.userId = :userId GROUP BY f.status")
     List<Object[]> countGroupedByStatusForUser(@Param("userId") Long userId);
 
-    @Query("SELECT f FROM Finding f WHERE " +
+    @Query("SELECT f.claim.claimId, COUNT(f) FROM Finding f WHERE f.claim.claimId IN :claimIds AND f.status = :status GROUP BY f.claim.claimId")
+    List<Object[]> countByClaimIdsAndStatus(@Param("claimIds") List<Long> claimIds, @Param("status") FindingStatus status);
+
+    @Query(value = "SELECT f FROM Finding f " +
+           "LEFT JOIN FETCH f.claim c " +
+           "LEFT JOIN FETCH c.product " +
+           "LEFT JOIN FETCH c.user " +
+           "LEFT JOIN FETCH f.assignedTo " +
+           "WHERE (:assignedToId IS NULL OR (f.assignedTo IS NOT NULL AND f.assignedTo.userId = :assignedToId)) AND " +
+           "(:status IS NULL OR f.status = :status) AND " +
+           "(:severity IS NULL OR f.severity = :severity) AND " +
+           "(:claimId IS NULL OR f.claim.claimId = :claimId)",
+           countQuery = "SELECT COUNT(f) FROM Finding f WHERE " +
            "(:assignedToId IS NULL OR (f.assignedTo IS NOT NULL AND f.assignedTo.userId = :assignedToId)) AND " +
            "(:status IS NULL OR f.status = :status) AND " +
            "(:severity IS NULL OR f.severity = :severity) AND " +

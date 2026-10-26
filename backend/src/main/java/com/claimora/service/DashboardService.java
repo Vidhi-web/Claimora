@@ -45,10 +45,28 @@ public class DashboardService {
         this.evidenceLinkRepository = evidenceLinkRepository;
     }
 
+    private volatile CachedStats cachedAdminStats;
+
+    private static class CachedStats {
+        final DashboardStatsResponse response;
+        final long timestamp;
+        CachedStats(DashboardStatsResponse response) {
+            this.response = response;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
+
     @Transactional(readOnly = true)
     public DashboardStatsResponse getDashboardStats(CustomUserDetails userDetails) {
         boolean isStaff = userDetails != null && userDetails.getRole() == Role.STAFF;
         Long userId = userDetails != null ? userDetails.getUserId() : null;
+
+        if (!isStaff) {
+            CachedStats cached = cachedAdminStats;
+            if (cached != null && (System.currentTimeMillis() - cached.timestamp) < 10000) {
+                return cached.response;
+            }
+        }
 
         DashboardStatsResponse.ClaimMetrics claimMetrics;
         DashboardStatsResponse.FindingMetrics findingMetrics;
@@ -57,7 +75,6 @@ public class DashboardService {
         DashboardStatsResponse.SystemMetrics systemMetrics;
 
         if (isStaff && userId != null) {
-            // Staff: 1 claim-group query + 1 finding-group query (instead of 9 separate counts)
             long[] cc = extractClaimCounts(claimRepository.countGroupedByStatusForUser(userId));
             double fraudRate = cc[0] > 0 ? (double)(cc[3] * 100) / cc[0] : 0.0;
             claimMetrics = new DashboardStatsResponse.ClaimMetrics(cc[0], cc[1], cc[2], cc[3], cc[4],
@@ -73,7 +90,6 @@ public class DashboardService {
             systemMetrics = new DashboardStatsResponse.SystemMetrics(0,
                     documentRepository.countByClaim_User_UserId(userId), 0);
         } else {
-            // Admin/Investigator: grouped queries (8 queries instead of 18)
             long[] cc = extractClaimCounts(claimRepository.countGroupedByStatus());
             double fraudRate = cc[0] > 0 ? (double)(cc[3] * 100) / cc[0] : 0.0;
             claimMetrics = new DashboardStatsResponse.ClaimMetrics(cc[0], cc[1], cc[2], cc[3], cc[4],
@@ -97,7 +113,7 @@ public class DashboardService {
                             ((Number) row[1]).longValue()))
                     .toList();
 
-            recentActivities = actionRepository.findTop10ByOrderByActionTimeDesc().stream()
+            recentActivities = actionRepository.findTop10WithDetails(org.springframework.data.domain.PageRequest.of(0, 10)).stream()
                     .map(InvestigationActionResponse::fromEntity).toList();
 
             systemMetrics = new DashboardStatsResponse.SystemMetrics(
@@ -106,7 +122,11 @@ public class DashboardService {
                     documentRepository.countByOcrStatus("MANUAL"));
         }
 
-        return new DashboardStatsResponse(claimMetrics, findingMetrics, topTriggeredRules, recentActivities, systemMetrics);
+        DashboardStatsResponse res = new DashboardStatsResponse(claimMetrics, findingMetrics, topTriggeredRules, recentActivities, systemMetrics);
+        if (!isStaff) {
+            cachedAdminStats = new CachedStats(res);
+        }
+        return res;
     }
 
     /** Converts grouped [[ClaimStatus, count]] rows to [total, submitted, underReview, flagged, resolved] */
