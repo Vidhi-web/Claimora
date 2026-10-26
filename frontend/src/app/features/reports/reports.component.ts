@@ -20,7 +20,7 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
           <button class="btn btn-secondary btn-sm print-btn" (click)="printReport()">
             🖨️ Print / Export PDF
           </button>
-          <button class="btn btn-primary btn-sm" (click)="loadReport()">
+          <button class="btn btn-primary btn-sm" (click)="loadReport(true)">
             🔄 Regenerate Report
           </button>
         </div>
@@ -192,9 +192,9 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
       display: inline-block;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #0369a1;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
       padding: 0.2rem 0.6rem;
       border-radius: var(--radius-full);
       margin-bottom: 0.5rem;
@@ -405,7 +405,7 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
 
     .data-table th {
       background: var(--bg-elevated);
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-weight: 600;
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -435,14 +435,14 @@ import { ReportSummaryResponse } from '../../models/dashboard.model';
     }
 
     .time-cell {
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-size: 0.8rem;
     }
 
     .empty-note {
       padding: 1.5rem;
       text-align: center;
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-size: 0.85rem;
     }
 
@@ -475,9 +475,9 @@ export class ReportsComponent implements OnInit {
     this.loadReport();
   }
 
-  loadReport(): void {
+  loadReport(forceRefresh = false): void {
     this.loading = true;
-    this.dashboardService.getSummaryReport().subscribe({
+    this.dashboardService.getSummaryReport(forceRefresh).subscribe({
       next: (res) => {
         this.report = res;
         this.loading = false;

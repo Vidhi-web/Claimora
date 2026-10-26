@@ -922,7 +922,7 @@ export class FindingsComponent implements OnInit {
     this.findingService.getFindings({
       status: this.selectedStatus,
       severity: this.selectedSeverity,
-      size: 50
+      size: 20
     }).subscribe({
       next: (res) => {
         this.findings = res.content;

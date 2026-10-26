@@ -758,17 +758,17 @@ export class DashboardComponent implements OnInit {
     this.recentClaims = [];
     this.statsError   = null;
     this.claimsError  = null;
-    this.loadStats();
+    this.loadStats(true);
     this.loadRecentClaims();
   }
 
   // ─────────────────────────────────────────────────────────
   // DATA LOADING  (independent: one failure doesn't block the other)
   // ─────────────────────────────────────────────────────────
-  loadStats(): void {
+  loadStats(forceRefresh = false): void {
     this.statsLoading = true;
     this.statsError   = null;
-    this.dashSvc.getStats().pipe(timeout(25000)).subscribe({
+    this.dashSvc.getStats(forceRefresh).pipe(timeout(25000)).subscribe({
       next: data => {
         this.stats        = data;
         this.statsLoading = false;

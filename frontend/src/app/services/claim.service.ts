@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Claim, ClaimRequest, ClaimStatus, AnalysisResultResponse } from '../models/claim.model';
 import { EvidenceDocument, DocumentType } from '../models/evidence.model';
@@ -11,6 +12,8 @@ import { PaginatedResponse } from '../models/api-response.model';
 })
 export class ClaimService {
   private readonly endpoint = '/claims';
+  private cachedDefaultClaims: PaginatedResponse<Claim> | null = null;
+  private cacheTime = 0;
 
   constructor(
     private api: ApiService,
@@ -24,8 +27,24 @@ export class ClaimService {
     size?: number;
     sortBy?: string;
     direction?: string;
-  } = {}): Observable<PaginatedResponse<Claim>> {
-    return this.api.get<PaginatedResponse<Claim>>(this.endpoint, params as Record<string, string | number | boolean | undefined>);
+  } = {}, forceRefresh = false): Observable<PaginatedResponse<Claim>> {
+    const isDefault = (!params.search || params.search.trim().length === 0) &&
+                      !params.status &&
+                      (!params.page || params.page === 0);
+
+    const now = Date.now();
+    if (!forceRefresh && isDefault && this.cachedDefaultClaims && (now - this.cacheTime) < 30000) {
+      return of(this.cachedDefaultClaims);
+    }
+
+    return this.api.get<PaginatedResponse<Claim>>(this.endpoint, params as Record<string, string | number | boolean | undefined>).pipe(
+      tap(res => {
+        if (isDefault) {
+          this.cachedDefaultClaims = res;
+          this.cacheTime = Date.now();
+        }
+      })
+    );
   }
 
   getClaimById(id: number): Observable<Claim> {
@@ -33,6 +52,7 @@ export class ClaimService {
   }
 
   createClaim(request: ClaimRequest): Observable<Claim> {
+    this.cachedDefaultClaims = null;
     return this.api.post<Claim>(this.endpoint, request);
   }
 
