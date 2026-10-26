@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
@@ -556,7 +556,9 @@ export class ProductsComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private authService: AuthService
+    private authService: AuthService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -576,9 +578,11 @@ export class ProductsComponent implements OnInit {
         this.totalElements = res.totalElements;
         this.totalPages = res.totalPages;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.showAlert(err.error?.message || 'Failed to load products', 'danger');
       }
     });

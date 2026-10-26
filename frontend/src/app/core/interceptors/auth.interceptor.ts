@@ -1,7 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, ApplicationRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, delay, retry, throwError, timer } from 'rxjs';
+import { catchError, delay, finalize, retry, throwError, timer } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
 /**
@@ -10,10 +10,13 @@ import { AuthService } from '../auth/auth.service';
  * 2. Auto-retries 0, 502, 503, 504 errors twice with a 2-second delay
  *    (handles Supabase/backend cold-start latency).
  * 3. On 401 Unauthorized: clears session and redirects to login.
+ * 4. Triggers Angular change detection (appRef.tick()) on request finalization
+ *    to ensure all views immediately update with loaded data in all tabs.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const appRef = inject(ApplicationRef);
   const token = authService.getToken();
 
   // Attach token for API calls
@@ -47,6 +50,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         });
       }
       return throwError(() => error);
+    }),
+    finalize(() => {
+      // Defer tick to next microtask so subscriber has already updated component state
+      queueMicrotask(() => {
+        try {
+          appRef.tick();
+        } catch {}
+      });
     })
   );
 };

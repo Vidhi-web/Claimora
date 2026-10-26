@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { timeout } from 'rxjs/operators';
@@ -724,6 +724,7 @@ export class DashboardComponent implements OnInit {
   private dashSvc  = inject(DashboardService);
   private claimSvc = inject(ClaimService);
   private router   = inject(Router);
+  private cdr      = inject(ChangeDetectorRef);
 
   // ── State ──
   stats:        DashboardStatsResponse | null = null;
@@ -775,12 +776,14 @@ export class DashboardComponent implements OnInit {
         this.barMax = data.topTriggeredRules.length
           ? Math.max(...data.topTriggeredRules.map(r => r.count))
           : 1;
+        this.cdr.detectChanges();
       },
       error: err => {
         this.statsError   = err?.name === 'TimeoutError'
           ? 'Dashboard timed out — backend may be slow. Click Refresh to retry.'
           : (err?.error?.message ?? 'Failed to load dashboard metrics.');
         this.statsLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -792,12 +795,14 @@ export class DashboardComponent implements OnInit {
       next: data => {
         this.recentClaims  = data.content;
         this.claimsLoading = false;
+        this.cdr.detectChanges();
       },
       error: err => {
         this.claimsError   = err?.name === 'TimeoutError'
           ? 'Timed out loading claims. Click Refresh.'
           : 'Failed to load recent claims.';
         this.claimsLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
