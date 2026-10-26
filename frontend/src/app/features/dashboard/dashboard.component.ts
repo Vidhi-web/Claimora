@@ -163,7 +163,7 @@ interface DonutSegment {
       <div class="donut-wrap" *ngIf="donutSegments.length > 0; else noDonut">
         <!-- SVG Donut -->
         <div class="donut-svg-wrap">
-          <svg viewBox="0 0 180 180" width="160" height="160" aria-label="Claims by status donut chart">
+          <svg viewBox="0 0 180 180" width="135" height="135" aria-label="Claims by status donut chart">
             <g *ngFor="let seg of donutSegments">
               <path [attr.d]="seg.path" [attr.fill]="seg.color" opacity="0.92"/>
             </g>
@@ -171,7 +171,7 @@ interface DonutSegment {
             <text x="90" y="86" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">
               {{ stats.claimMetrics.totalClaims }}
             </text>
-            <text x="90" y="102" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="500">
+            <text x="90" y="102" text-anchor="middle" font-size="10" fill="#64748b" font-weight="600">
               Total Claims
             </text>
           </svg>
@@ -542,11 +542,11 @@ interface DonutSegment {
     /* ══ Charts Row ══ */
     .charts-row {
       display: grid;
-      grid-template-columns: 220px 1fr 200px;
-      gap: .875rem;
-      align-items: start;
+      grid-template-columns: minmax(360px, 1.25fr) minmax(340px, 1.75fr) minmax(220px, 1fr);
+      gap: 1rem;
+      align-items: stretch;
     }
-    @media (max-width: 1200px) {
+    @media (max-width: 1280px) {
       .charts-row { grid-template-columns: 1fr 1fr; }
       .chart-card-narrow { grid-column: 1 / -1; }
     }
@@ -558,6 +558,8 @@ interface DonutSegment {
       border-radius: var(--radius-lg);
       padding: 1.125rem 1.25rem;
       box-shadow: var(--shadow-xs);
+      min-width: 0;
+      overflow: hidden;
     }
     .chart-card-wide   { /* takes fr space */ }
     .chart-card-narrow { /* system metrics */ }
@@ -577,15 +579,45 @@ interface DonutSegment {
     .chart-empty { color: var(--text-dim); font-size: .8125rem; text-align: center; padding: 2rem 0; display: flex; flex-direction: column; align-items: center; gap: .5rem; }
 
     /* ── Donut Chart ── */
-    .donut-wrap { display: flex; align-items: center; gap: 1.25rem; }
-    .donut-svg-wrap { flex-shrink: 0; }
+    .donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .donut-svg-wrap {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    .donut-legend { display: flex; flex-direction: column; gap: .5rem; flex: 1; }
-    .legend-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .legend-label { flex: 1; color: var(--text-muted); }
-    .legend-count { font-weight: 600; color: var(--text-main); }
-    .legend-pct { color: var(--text-dim); min-width: 32px; text-align: right; }
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      flex: 1;
+      min-width: 0;
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      font-size: .8125rem;
+      min-width: 0;
+    }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label {
+      flex: 1;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .legend-count { font-weight: 600; color: var(--text-main); flex-shrink: 0; }
+    .legend-pct { color: var(--text-dim); min-width: 34px; text-align: right; flex-shrink: 0; font-size: .75rem; }
 
     /* ── Rule Bars ── */
     .rules-list { display: flex; flex-direction: column; gap: .875rem; }
