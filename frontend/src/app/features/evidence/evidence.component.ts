@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EvidenceService } from '../../services/evidence.service';
@@ -629,7 +629,8 @@ export class EvidenceComponent implements OnInit {
   constructor(
     private evidenceService: EvidenceService,
     private claimService: ClaimService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -653,9 +654,11 @@ export class EvidenceComponent implements OnInit {
       next: (docs) => {
         this.documents = docs;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.showAlert(err.error?.message || 'Failed to load evidence documents', 'danger');
       }
     });
@@ -665,6 +668,7 @@ export class EvidenceComponent implements OnInit {
     this.claimService.getClaims({ size: 100 }).subscribe({
       next: (res) => {
         this.claims = res.content;
+        this.cdr.detectChanges();
       }
     });
   }

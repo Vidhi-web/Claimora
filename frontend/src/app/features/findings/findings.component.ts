@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FindingService } from '../../services/finding.service';
@@ -899,7 +899,8 @@ export class FindingsComponent implements OnInit {
   constructor(
     private findingService: FindingService,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -926,9 +927,11 @@ export class FindingsComponent implements OnInit {
       next: (res) => {
         this.findings = res.content;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.showAlert(err.error?.message || 'Failed to load findings', 'danger');
       }
     });
@@ -939,6 +942,7 @@ export class FindingsComponent implements OnInit {
       this.userService.getUsers('', 0, 50).subscribe({
         next: (res) => {
           this.investigators = res.content;
+          this.cdr.detectChanges();
         }
       });
     }
@@ -960,6 +964,7 @@ export class FindingsComponent implements OnInit {
     this.findingService.getActionsForFinding(f.findingId).subscribe({
       next: (actions) => {
         this.findingActions = actions;
+        this.cdr.detectChanges();
       }
     });
   }

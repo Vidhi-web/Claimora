@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InvestigationService } from '../../services/investigation.service';
@@ -412,7 +412,10 @@ export class InvestigationsComponent implements OnInit {
   selectedType: ActionType | undefined = undefined;
   loading = false;
 
-  constructor(private investigationService: InvestigationService) {}
+  constructor(
+    private investigationService: InvestigationService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadActions();
@@ -424,9 +427,11 @@ export class InvestigationsComponent implements OnInit {
       next: (acts) => {
         this.actions = acts;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardService } from '../../services/dashboard.service';
 import { ReportSummaryResponse } from '../../models/dashboard.model';
@@ -466,7 +466,10 @@ export class ReportsComponent implements OnInit {
   report: ReportSummaryResponse | null = null;
   loading = false;
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadReport();
@@ -478,9 +481,11 @@ export class ReportsComponent implements OnInit {
       next: (res) => {
         this.report = res;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

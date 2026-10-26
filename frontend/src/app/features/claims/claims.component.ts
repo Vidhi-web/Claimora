@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClaimService } from '../../services/claim.service';
@@ -1071,7 +1071,8 @@ export class ClaimsComponent implements OnInit {
   constructor(
     private claimService: ClaimService,
     private productService: ProductService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -1097,9 +1098,11 @@ export class ClaimsComponent implements OnInit {
         this.totalElements = res.totalElements;
         this.totalPages = res.totalPages;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.showAlert(err.error?.message || 'Failed to load claims', 'danger');
       }
     });
@@ -1109,6 +1112,7 @@ export class ClaimsComponent implements OnInit {
     this.productService.getProducts('', 0, 50).subscribe({
       next: (res) => {
         this.availableProducts = res.content;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1156,6 +1160,7 @@ export class ClaimsComponent implements OnInit {
       error: (err) => {
         this.submittingClaim = false;
         this.showAlert(err.error?.message || 'Failed to create claim', 'danger');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1178,6 +1183,7 @@ export class ClaimsComponent implements OnInit {
     this.claimService.getClaimDocuments(claimId).subscribe({
       next: (docs) => {
         this.claimDocuments = docs;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1204,6 +1210,7 @@ export class ClaimsComponent implements OnInit {
       error: (err) => {
         this.uploadingDoc = false;
         this.showAlert(err.error?.message || 'Failed to upload document', 'danger');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -1229,10 +1236,12 @@ export class ClaimsComponent implements OnInit {
         }
 
         this.showAlert(`Analysis complete for ${res.claimNumber}! Score: ${res.score} (${res.riskLevel} Risk, ${res.findingsCreated} new findings created)`, 'success');
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.analyzingClaimId = null;
         this.showAlert(err.error?.message || 'Analysis failed', 'danger');
+        this.cdr.detectChanges();
       }
     });
   }
