@@ -372,7 +372,7 @@ import { Product, CreateProductRequest, UpdateProductRequest } from '../../model
 
     .data-table th {
       background: var(--bg-elevated);
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-weight: 600;
       font-size: 0.8rem;
       text-transform: uppercase;
