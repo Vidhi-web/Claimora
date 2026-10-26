@@ -11,7 +11,6 @@ export const routes: Routes = [
   },
   {
     path: 'auth/login',
-    canActivate: [publicGuard],
     loadComponent: () => import('./features/auth/auth.component').then(m => m.AuthComponent)
   },
   {
