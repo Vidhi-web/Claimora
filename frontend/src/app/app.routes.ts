@@ -4,10 +4,9 @@ import { roleGuard }   from './core/guards/role.guard';
 import { publicGuard } from './core/guards/public.guard';
 
 export const routes: Routes = [
-  // ── Public routes (redirect to /dashboard if already logged in) ──────────
+  // ── Public routes ────────────────────────────────────────────────────────
   {
     path: '',
-    canActivate: [publicGuard],
     loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
   {
