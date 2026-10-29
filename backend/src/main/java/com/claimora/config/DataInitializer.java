@@ -2,6 +2,7 @@ package com.claimora.config;
 
 import com.claimora.entity.*;
 import com.claimora.repository.*;
+import com.claimora.storage.DocumentStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +15,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Startup seeder creating default accounts and realistic baseline warranty/fraud records
- * if the database is unpopulated.
+ * Startup seeder creating default accounts, realistic baseline warranty/fraud records,
+ * and ensuring sample evidence files exist on disk for download.
  */
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -30,6 +31,7 @@ public class DataInitializer implements CommandLineRunner {
     private final EvidenceLinkRepository evidenceLinkRepository;
     private final InvestigationActionRepository actionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DocumentStorageService storageService;
 
     @Value("${claimora.admin.email:${ADMIN_EMAIL:admin@claimora.internal}}")
     private String adminEmail;
@@ -47,7 +49,8 @@ public class DataInitializer implements CommandLineRunner {
                            FindingRepository findingRepository,
                            EvidenceLinkRepository evidenceLinkRepository,
                            InvestigationActionRepository actionRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           DocumentStorageService storageService) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.claimRepository = claimRepository;
@@ -56,6 +59,7 @@ public class DataInitializer implements CommandLineRunner {
         this.evidenceLinkRepository = evidenceLinkRepository;
         this.actionRepository = actionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.storageService = storageService;
     }
 
     @Override
@@ -63,6 +67,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         seedUsers();
         seedBaselineData();
+        ensureSampleFilesExist();
     }
 
     private void seedUsers() {
@@ -183,5 +188,30 @@ public class DataInitializer implements CommandLineRunner {
         actionRepository.save(act1);
 
         log.info("Baseline seed successfully initialized.");
+    }
+
+    private void ensureSampleFilesExist() {
+        try {
+            List<EvidenceDocument> docs = documentRepository.findAll();
+            for (EvidenceDocument doc : docs) {
+                String claimNumber = doc.getClaim() != null ? doc.getClaim().getClaimNumber() : "Claim Document #" + doc.getDocumentId();
+                String productModel = (doc.getClaim() != null && doc.getClaim().getProduct() != null)
+                        ? doc.getClaim().getProduct().getModel()
+                        : "Unknown Product";
+                storageService.loadOrCreateDocumentResource(
+                        doc.getFilePath(),
+                        doc.getOriginalFilename(),
+                        doc.getMimeType(),
+                        doc.getDocumentType() != null ? doc.getDocumentType().name() : "EVIDENCE",
+                        claimNumber,
+                        productModel,
+                        doc.getFileHash(),
+                        doc.getExtractedData()
+                );
+            }
+            log.info("Ensured {} baseline evidence files exist on disk in storage repository.", docs.size());
+        } catch (Exception e) {
+            log.warn("Non-fatal: could not pre-seed all sample evidence files: {}", e.getMessage());
+        }
     }
 }

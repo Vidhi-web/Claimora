@@ -112,8 +112,8 @@ import { Claim } from '../../models/claim.model';
               </td>
               <td style="text-align: right;">
                 <div class="table-actions">
-                  <button class="btn btn-secondary btn-sm" (click)="downloadFile(doc)" title="Download original evidence file">
-                    ⬇ File
+                  <button class="btn btn-secondary btn-sm" [disabled]="downloadingDocId === doc.documentId" (click)="downloadFile(doc)" title="Download original evidence file">
+                    {{ downloadingDocId === doc.documentId ? '⏳ Downloading...' : '⬇ File' }}
                   </button>
                   <button class="btn btn-primary btn-sm" (click)="openOcrModal(doc)">
                     ⚙ OCR Data
@@ -614,6 +614,7 @@ export class EvidenceComponent implements OnInit {
   selectedClaimFilter: number | null = null;
   searchQuery = '';
   loading = false;
+  downloadingDocId: number | null = null;
 
   alertMessage: string | null = null;
   alertType: 'success' | 'danger' = 'success';
@@ -697,17 +698,32 @@ export class EvidenceComponent implements OnInit {
   }
 
   downloadFile(doc: EvidenceDocument): void {
+    this.downloadingDocId = doc.documentId;
     this.evidenceService.downloadDocumentFile(doc.documentId).subscribe({
       next: (blob) => {
+        this.downloadingDocId = null;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = doc.originalFilename || `evidence_${doc.documentId}`;
+        a.download = doc.originalFilename || `evidence_${doc.documentId}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
+        this.cdr.detectChanges();
       },
-      error: (err) => {
-        this.showAlert(err.error?.message || 'Failed to download file', 'danger');
+      error: async (err) => {
+        this.downloadingDocId = null;
+        let message = 'Failed to download file';
+        if (err.error instanceof Blob) {
+          try {
+            const text = await err.error.text();
+            const json = JSON.parse(text);
+            if (json.message) message = json.message;
+          } catch {}
+        } else if (err.error?.message) {
+          message = err.error.message;
+        }
+        this.showAlert(message, 'danger');
+        this.cdr.detectChanges();
       }
     });
   }

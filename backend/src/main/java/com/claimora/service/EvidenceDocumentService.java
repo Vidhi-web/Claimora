@@ -155,7 +155,22 @@ public class EvidenceDocumentService {
             }
         }
 
-        Resource resource = storageService.loadFileAsResource(doc.getFilePath());
+        String claimNumber = doc.getClaim() != null ? doc.getClaim().getClaimNumber() : "Claim Document #" + doc.getDocumentId();
+        String productModel = (doc.getClaim() != null && doc.getClaim().getProduct() != null)
+                ? doc.getClaim().getProduct().getModel()
+                : "Unknown Product";
+
+        Resource resource = storageService.loadOrCreateDocumentResource(
+                doc.getFilePath(),
+                doc.getOriginalFilename(),
+                doc.getMimeType(),
+                doc.getDocumentType() != null ? doc.getDocumentType().name() : "EVIDENCE",
+                claimNumber,
+                productModel,
+                doc.getFileHash(),
+                doc.getExtractedData()
+        );
+
         return new DocumentDownload(resource, doc.getOriginalFilename(), doc.getMimeType());
     }
 
