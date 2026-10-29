@@ -93,7 +93,7 @@ public class AnalysisServiceTest {
         when(findingRepository.findByClaim_ClaimId(100L)).thenReturn(List.of(), List.of(
                 new Finding(claim, null, "RULE_TEST", FindingSeverity.HIGH, FindingStatus.OPEN, "Test finding description")
         ));
-        when(findingRepository.save(any(Finding.class))).thenAnswer(invocation -> {
+        when(findingRepository.saveAndFlush(any(Finding.class))).thenAnswer(invocation -> {
             Finding f = invocation.getArgument(0);
             f.setFindingId(1001L);
             return f;
@@ -106,8 +106,8 @@ public class AnalysisServiceTest {
         assertEquals("FLAGGED", claim.getStatus().name());
         assertEquals(40, response.getScore());
         assertEquals("MEDIUM", response.getRiskLevel()); // 40 is MEDIUM (25-49)
-        verify(findingRepository).save(any(Finding.class));
-        verify(evidenceLinkRepository).save(any(EvidenceLink.class));
+        verify(findingRepository).saveAndFlush(any(Finding.class));
+        verify(evidenceLinkRepository).saveAndFlush(any(EvidenceLink.class));
         verify(claimRepository).save(claim);
     }
 

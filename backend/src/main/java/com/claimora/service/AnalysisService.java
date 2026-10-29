@@ -41,6 +41,7 @@ public class AnalysisService {
     private final InvestigationActionRepository actionRepository;
     private final List<AnalysisRule> rules;
     private final ObjectMapper objectMapper;
+    private final jakarta.persistence.EntityManager entityManager;
 
     public AnalysisService(ClaimRepository claimRepository,
                            EvidenceDocumentRepository documentRepository,
@@ -48,7 +49,19 @@ public class AnalysisService {
                            EvidenceLinkRepository evidenceLinkRepository,
                            InvestigationActionRepository actionRepository,
                            List<AnalysisRule> rules,
-                           @org.springframework.beans.factory.annotation.Autowired(required = false) ObjectMapper objectMapper) {
+                           ObjectMapper objectMapper) {
+        this(claimRepository, documentRepository, findingRepository, evidenceLinkRepository, actionRepository, rules, objectMapper, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AnalysisService(ClaimRepository claimRepository,
+                           EvidenceDocumentRepository documentRepository,
+                           FindingRepository findingRepository,
+                           EvidenceLinkRepository evidenceLinkRepository,
+                           InvestigationActionRepository actionRepository,
+                           List<AnalysisRule> rules,
+                           @org.springframework.beans.factory.annotation.Autowired(required = false) ObjectMapper objectMapper,
+                           @org.springframework.beans.factory.annotation.Autowired(required = false) jakarta.persistence.EntityManager entityManager) {
         this.claimRepository = claimRepository;
         this.documentRepository = documentRepository;
         this.findingRepository = findingRepository;
@@ -56,6 +69,7 @@ public class AnalysisService {
         this.actionRepository = actionRepository;
         this.rules = rules != null ? rules : List.of();
         this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -103,7 +117,7 @@ public class AnalysisService {
                                 FindingStatus.OPEN,
                                 draft.getDescription()
                         );
-                        targetFinding = findingRepository.save(newFinding);
+                        targetFinding = findingRepository.saveAndFlush(newFinding);
                         findingsCreated++;
                         log.info("Created new finding #{} for rule {} on claim {}",
                                 targetFinding.getFindingId(), draft.getRuleCode(), claimId);
@@ -112,11 +126,11 @@ public class AnalysisService {
                     // Populate evidence links idempotently
                     for (LinkedEvidenceDraft linkDraft : draft.getEvidenceLinks()) {
                         EvidenceDocument doc = linkDraft.getDocument();
-                        if (doc != null && doc.getDocumentId() != null) {
+                        if (doc != null && doc.getDocumentId() != null && targetFinding != null && targetFinding.getFindingId() != null) {
                             EvidenceLinkId linkId = new EvidenceLinkId(targetFinding.getFindingId(), doc.getDocumentId());
                             if (!evidenceLinkRepository.existsById(linkId)) {
                                 EvidenceLink link = new EvidenceLink(targetFinding, doc, linkDraft.getRole());
-                                evidenceLinkRepository.save(link);
+                                evidenceLinkRepository.saveAndFlush(link);
                             }
                         }
                     }
