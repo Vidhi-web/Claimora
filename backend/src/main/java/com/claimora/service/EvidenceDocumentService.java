@@ -215,5 +215,27 @@ public class EvidenceDocumentService {
         return EvidenceDocumentResponse.fromEntity(saved);
     }
 
-    public record DocumentDownload(Resource resource, String filename, String mimeType) {}
+    public static final class DocumentDownload {
+        private final Resource resource;
+        private final String filename;
+        private final String mimeType;
+
+        public DocumentDownload(Resource resource, String filename, String mimeType) {
+            this.resource = resource;
+            this.filename = filename;
+            this.mimeType = mimeType;
+        }
+
+        public Resource resource() {
+            return this.resource;
+        }
+
+        public String filename() {
+            return this.filename;
+        }
+
+        public String mimeType() {
+            return this.mimeType;
+        }
+    }
 }

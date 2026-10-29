@@ -194,15 +194,20 @@ public class DataInitializer implements CommandLineRunner {
         try {
             List<EvidenceDocument> docs = documentRepository.findAll();
             for (EvidenceDocument doc : docs) {
-                String claimNumber = doc.getClaim() != null ? doc.getClaim().getClaimNumber() : "Claim Document #" + doc.getDocumentId();
-                String productModel = (doc.getClaim() != null && doc.getClaim().getProduct() != null)
-                        ? doc.getClaim().getProduct().getModel()
-                        : "Unknown Product";
+                String claimNumber = "Claim";
+                String productModel = "Unknown Product";
+                if (doc.getClaim() != null) {
+                    claimNumber = doc.getClaim().getClaimNumber();
+                    if (doc.getClaim().getProduct() != null) {
+                        productModel = doc.getClaim().getProduct().getModel();
+                    }
+                }
+                String docType = doc.getDocumentType() != null ? doc.getDocumentType().name() : "EVIDENCE";
                 storageService.loadOrCreateDocumentResource(
                         doc.getFilePath(),
                         doc.getOriginalFilename(),
                         doc.getMimeType(),
-                        doc.getDocumentType() != null ? doc.getDocumentType().name() : "EVIDENCE",
+                        docType,
                         claimNumber,
                         productModel,
                         doc.getFileHash(),
