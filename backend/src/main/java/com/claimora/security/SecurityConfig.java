@@ -64,6 +64,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public authentication, dev console, health, and Swagger/OpenAPI docs
                         .requestMatchers(
+                                "/", "/index.html", "/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg",
+                                "/assets/**", "/media/**",
+                                "/dashboard", "/products", "/claims", "/evidence", "/findings",
+                                "/investigations", "/reports", "/users", "/profile", "/auth/**",
                                 "/api/auth/**", "/api/health", "/error", "/h2-console/**",
                                 "/swagger-ui.html", "/swagger-ui/**",
                                 "/v3/api-docs", "/v3/api-docs/**",
